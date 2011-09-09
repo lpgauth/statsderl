@@ -17,6 +17,7 @@
 %% ===================================================================
 
 start_link() ->
+    init_red(),
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 %% ===================================================================
@@ -26,3 +27,10 @@ start_link() ->
 init([]) ->
     {ok, { {one_for_one, 5, 10}, [?CHILD(statsderl, worker)]} }.
 
+%% ------------------------------------------------------------------
+%% Internal Function Definitions
+%% ------------------------------------------------------------------
+
+init_red() ->
+    statsderl = ets:new(statsderl, [set, public, named_table, {read_concurrency, true}]),
+    true = ets:insert(statsderl, {backlog, 0}).
