@@ -15,7 +15,7 @@
 %% API Function Exports
 %% ------------------------------------------------------------------
 
--export([start_link/0, increment/3, decrement/3, timing/3]).
+-export([start_link/0, increment/3, decrement/3, timing/3, timing_now/3]).
 
 %% ------------------------------------------------------------------
 %% gen_server Function Exports
@@ -39,10 +39,13 @@ decrement(Key, Magnitude, SampleRate) ->
     Stats = io_lib:format("~s:-~B|c|@~f", [Key, Magnitude, SampleRate]),
     udp_send(Stats, SampleRate).
 
-timing(Key, Timestamp, SampleRate) ->
-    Timing = timer:now_diff(erlang:now(), Timestamp) div 1000,
-    Stats = io_lib:format("~s:~B|ms|@~f", [Key, Timing, SampleRate]),
-    udp_send(Stats, SampleRate).    
+timing(Key, Value, SampleRate) ->
+    Stats = io_lib:format("~s:~B|ms|@~f", [Key, Value, SampleRate]),
+    udp_send(Stats, SampleRate).   
+
+timing_now(Key, Timestamp, SampleRate) ->
+    Value = timer:now_diff(erlang:now(), Timestamp) div 1000,
+    timing(Key, Value, SampleRate).   
 
 %% ------------------------------------------------------------------
 %% gen_server Function Definitions

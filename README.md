@@ -12,8 +12,11 @@
     statsderl:decrement("test.decrement", 1, 0.5).
     
 #### Timing
+    statsderl:timing("test.timing", 5, 0.5).
+    
+#### Timing now
     Timestamp = erlang:now(),
-    statsderl:timing("test.timing", Timestamp, 0.5).
+    statsderl:timing_now("test.timing", Timestamp, 0.5).
 
 
 
