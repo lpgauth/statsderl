@@ -10,7 +10,7 @@
 -export([init/1]).
 
 %% Helper macro for declaring children of supervisor
--define(CHILD(I, Type), {I, {I, start_link, []}, permanent, 5000, Type, [I]}).
+-define(CHILD(I, Type, Args), {I, {I, start_link, Args}, permanent, 5000, Type, [I]}).
 
 %% ===================================================================
 %% API functions
@@ -18,14 +18,18 @@
 
 start_link() ->
     init_red(),
-    supervisor:start_link({local, ?MODULE}, ?MODULE, []).
+    BaseKey = case application:get_env(statsderl, base_key) of
+        {ok, Key} -> Key;
+        undefined -> ""
+    end,
+    supervisor:start_link({local, ?MODULE}, ?MODULE, BaseKey).
 
 %% ===================================================================
 %% Supervisor callbacks
 %% ===================================================================
 
-init([]) ->
-    {ok, { {one_for_one, 5, 10}, [?CHILD(statsderl, worker)]} }.
+init(BaseKey) ->
+    {ok, { {one_for_one, 5, 10}, [?CHILD(statsderl, worker, BaseKey)]} }.
 
 %% ------------------------------------------------------------------
 %% Internal Function Definitions

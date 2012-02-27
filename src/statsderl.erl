@@ -8,14 +8,15 @@
 -record(state, {
     hostname,
     port,
-    socket
+    socket,
+    basekey
 }).
 
 %% ------------------------------------------------------------------
 %% API Function Exports
 %% ------------------------------------------------------------------
 
--export([start_link/0, increment/3, decrement/3, timing/3, timing_now/3]).
+-export([start_link/1, increment/3, decrement/3, timing/3, timing_now/3]).
 
 %% ------------------------------------------------------------------
 %% gen_server Function Exports
@@ -28,8 +29,8 @@
 %% API Function Definitions
 %% ------------------------------------------------------------------
 
-start_link() ->
-    gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
+start_link(BaseKey) ->
+    gen_server:start_link({local, ?SERVER}, ?MODULE, BaseKey, []).
     
 increment(Key, Magnitude, SampleRate) ->
     Stats = io_lib:format("~s:~B|c|@~f", [Key, Magnitude, SampleRate]),
@@ -51,23 +52,27 @@ timing_now(Key, Timestamp, SampleRate) ->
 %% gen_server Function Definitions
 %% ------------------------------------------------------------------
 
-init(_Args) ->
+init(BaseKey) ->
     {ok, Hostname} = application:get_env(statsderl, hostname),
     {ok, Port} = application:get_env(statsderl, port),
     {ok, Socket} = gen_udp:open(0, [{active, false}]),
     State = #state {
         hostname = Hostname,
         port = Port,
-        socket = Socket  
+        socket = Socket,
+        basekey = case BaseKey of
+            "" -> "";
+            _ -> [BaseKey, $.]
+        end
     },
     {ok, State}.
 
 handle_call(_Request, _From, State) ->
     {noreply, ok, State}.
 
-handle_cast({udp_send, Stats}, 
+handle_cast({udp_send, Stats = #state{basekey=BaseKey}},
     #state{hostname=Hostname, port=Port, socket=Socket}=State) ->
-    gen_udp:send(Socket, Hostname, Port, Stats),
+    gen_udp:send(Socket, Hostname, Port, [BaseKey, Stats]),
     decrease_backlog(),
     {noreply, State};
 handle_cast(_Msg, State) ->
@@ -133,4 +138,4 @@ increase_backlog() ->
     ets:update_counter(statsderl, backlog, 1).
 
 decrease_backlog() ->
-    ets:update_counter(statsderl, backlog, -1). 
+    ets:update_counter(statsderl, backlog, -1).
