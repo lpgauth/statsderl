@@ -70,8 +70,8 @@ init(BaseKey) ->
 handle_call(_Request, _From, State) ->
     {noreply, ok, State}.
 
-handle_cast({udp_send, Stats = #state{basekey=BaseKey}},
-    #state{hostname=Hostname, port=Port, socket=Socket}=State) ->
+handle_cast({udp_send, Stats},
+            #state{hostname=Hostname, port=Port, socket=Socket, basekey=BaseKey}=State) ->
     gen_udp:send(Socket, Hostname, Port, [BaseKey, Stats]),
     decrease_backlog(),
     {noreply, State};

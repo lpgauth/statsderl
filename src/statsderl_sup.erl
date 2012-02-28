@@ -29,7 +29,7 @@ start_link() ->
 %% ===================================================================
 
 init(BaseKey) ->
-    {ok, { {one_for_one, 5, 10}, [?CHILD(statsderl, worker, BaseKey)]} }.
+    {ok, { {one_for_one, 5, 10}, [?CHILD(statsderl, worker, [BaseKey])]} }.
 
 %% ------------------------------------------------------------------
 %% Internal Function Definitions
