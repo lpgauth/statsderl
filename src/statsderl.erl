@@ -15,7 +15,7 @@
 %% ------------------------------------------------------------------
 
 -export([start_link/0, increment/3, decrement/3, timing/3,
-        timing_now/3]).
+        timing_now/3, gauge/3]).
 
 %% ------------------------------------------------------------------
 %% gen_server Function Exports
@@ -42,6 +42,9 @@ timing(Key, Value, SampleRate) ->
 
 timing_now(Key, Timestamp, SampleRate) ->
     timing(Key, now_diff_ms(Timestamp), SampleRate).
+
+gauge(Key, Value, SampleRate) ->
+    send(gauge, Key, Value, SampleRate).
 
 %% ------------------------------------------------------------------
 %% gen_server Function Definitions
@@ -114,5 +117,7 @@ generate_packet(Method, Key, Value, SampleRate) ->
         decrement ->
             [Key, <<":-">>, BinValue, <<"|c">>, BinSampleRate];
         timing ->
-            [Key, <<":">>, BinValue, <<"|ms">>, BinSampleRate]
+            [Key, <<":">>, BinValue, <<"|ms">>, BinSampleRate];
+        gauge ->
+            [Key, <<":">>, BinValue, <<"|g">>, BinSampleRate]
     end.
