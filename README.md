@@ -18,6 +18,9 @@
     Timestamp = erlang:now(),
     statsderl:timing_now("test.timing", Timestamp, 0.5).
 
+#### Gauge 
+    statsderl:gauge("test.gauge", 333, 1.0).
+
 ### Base Key
 
 For multi-node setups, it might be useful to be able to define a basic key based on the current node name, for example. Statsderl supports doing so by setting the app variable `base_key` to some iolist:
