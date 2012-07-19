@@ -90,7 +90,7 @@ code_change(_OldVsn, State, _Extra) ->
 %% ------------------------------------------------------------------
 
 send(Method, Key, Value, SampleRate) ->
-    random:seed(erlang:now()),
+    maybe_seed(),
     case random:uniform() =< SampleRate of
         true ->
             Packet = generate_packet(Method, Key, Value, SampleRate),
@@ -120,4 +120,19 @@ generate_packet(Method, Key, Value, SampleRate) ->
             [Key, <<":">>, BinValue, <<"|ms">>, BinSampleRate];
         gauge ->
             [Key, <<":">>, BinValue, <<"|g">>, BinSampleRate]
+    end.
+
+%% this check verifies whether a seed is already placed
+%% in the process dictionary for the random module -- if
+%% it is, we don't re-seed for any reason, except if the
+%% seed is bad (say, {X,X,X} -- usually {0,0,0} and {1,1,1}
+%% for the default seed
+maybe_seed() ->
+    case get(random_seed) of
+        undefined ->
+            random:seed(erlang:now());
+        {X,X,X} ->
+            random:seed(erlang:now());
+        _ ->
+            ok
     end.
