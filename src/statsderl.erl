@@ -89,15 +89,22 @@ code_change(_OldVsn, State, _Extra) ->
 %% Internal Function Definitions
 %% ------------------------------------------------------------------
 
+send(Method, Key, Value, 1) ->
+    send_packet(Method, Key, Value, 1);
+
+send(Method, Key, Value, 1.0) ->
+    send_packet(Method, Key, Value, 1.0);
+
 send(Method, Key, Value, SampleRate) ->
     maybe_seed(),
     case random:uniform() =< SampleRate of
-        true ->
-            Packet = generate_packet(Method, Key, Value, SampleRate),
-            gen_server:cast(?MODULE, {send, Packet});
-        false ->
-            ok
+        true  -> send_packet(Method, Key, Value, SampleRate);
+        false -> ok
     end.
+
+send_packet(Method, Key, Value, SampleRate) ->
+    Packet = generate_packet(Method, Key, Value, SampleRate),
+    gen_server:cast(?MODULE, {send, Packet}).
 
 now_diff_ms(Timestamp) ->
     timer:now_diff(os:timestamp(), Timestamp) div 1000.
