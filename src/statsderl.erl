@@ -76,7 +76,19 @@ handle_call(_Request, _From, State) ->
 
 handle_cast({send, Packet}, State=#state{hostname=Hostname,
         port=Port, socket=Socket, basekey=BaseKey}) ->
-    gen_udp:send(Socket, Hostname, Port, [BaseKey, Packet]),
+    {A,B,C,D} = Hostname,
+    Message = [BaseKey, Packet],
+    try erlang:port_command(Socket,
+                            [[((Port) bsr 8) band 16#ff,
+                              (Port) band 16#ff],
+                             [A band 16#ff, B band 16#ff,
+                              C band 16#ff, D band 16#ff],
+                             Message])of
+        true -> ok
+    catch
+        error:Error ->
+            {error, {einval, Error}}
+    end,
     {noreply, State};
 handle_cast(_Msg, State) ->
     {noreply, State}.
