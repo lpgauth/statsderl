@@ -14,15 +14,28 @@
 %% API Function Exports
 %% ------------------------------------------------------------------
 
--export([start_link/0, increment/3, decrement/3, timing/3,
-        timing_now/3, gauge/3, timing_fun/3]).
+-export([
+    start_link/0,
+    decrement/3,
+    gauge/3,
+    increment/3,
+    timing/3,
+    timing_fun/3,
+    timing_now/3
+    ]).
 
 %% ------------------------------------------------------------------
 %% gen_server Function Exports
 %% ------------------------------------------------------------------
 
--export([init/1, handle_call/3, handle_cast/2, handle_info/2,
-         terminate/2, code_change/3]).
+-export([
+    init/1,
+    handle_call/3,
+    handle_cast/2,
+    handle_info/2,
+    terminate/2,
+    code_change/3
+]).
 
 %% ------------------------------------------------------------------
 %% API Function Definitions
@@ -31,25 +44,25 @@
 start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
-increment(Key, Value, SampleRate) ->
-    send(increment, Key, Value, SampleRate).
-
 decrement(Key, Value, SampleRate) ->
     send(decrement, Key, Value, SampleRate).
 
-timing(Key, Value, SampleRate) ->
-    send(timing, Key, Value, SampleRate).
-
-timing_now(Key, Timestamp, SampleRate) ->
-    timing(Key, now_diff_ms(Timestamp), SampleRate).
+increment(Key, Value, SampleRate) ->
+    send(increment, Key, Value, SampleRate).
 
 gauge(Key, Value, SampleRate) ->
     send(gauge, Key, Value, SampleRate).
+
+timing(Key, Value, SampleRate) ->
+    send(timing, Key, Value, SampleRate).
 
 timing_fun(Key, Fun, SampleRate) ->
     Timestamp = os:timestamp(),
     Fun(),
     timing_now(Key, Timestamp, SampleRate).
+
+timing_now(Key, Timestamp, SampleRate) ->
+    timing(Key, now_diff_ms(Timestamp), SampleRate).
 
 %% ------------------------------------------------------------------
 %% gen_server Function Definitions
@@ -74,20 +87,21 @@ init(_Args) ->
 handle_call(_Request, _From, State) ->
     {noreply, ok, State}.
 
-handle_cast({send, Packet}, State=#state{hostname=Hostname,
-        port=Port, socket=Socket, basekey=BaseKey}) ->
-    {A,B,C,D} = Hostname,
-    Message = [BaseKey, Packet],
-    try erlang:port_command(Socket,
-                            [[((Port) bsr 8) band 16#ff,
-                              (Port) band 16#ff],
-                             [A band 16#ff, B band 16#ff,
-                              C band 16#ff, D band 16#ff],
-                             Message])of
+handle_cast({send, Packet}, State = #state {
+        hostname = {A,B,C,D},
+        port = Port,
+        socket = Socket,
+        basekey = BaseKey}) ->
+
+    Message = [
+        [((Port) bsr 8) band 16#ff, (Port) band 16#ff],
+        [A band 16#ff, B band 16#ff, C band 16#ff, D band 16#ff],
+        [BaseKey, Packet]
+    ],
+    try erlang:port_command(Socket, Message) of
         true -> ok
     catch
-        error:Error ->
-            {error, {einval, Error}}
+        _:_ -> ok
     end,
     {noreply, State};
 handle_cast(_Msg, State) ->
@@ -105,26 +119,6 @@ code_change(_OldVsn, State, _Extra) ->
 %% ------------------------------------------------------------------
 %% Internal Function Definitions
 %% ------------------------------------------------------------------
-
-send(Method, Key, Value, 1) ->
-    send_packet(Method, Key, Value, 1);
-
-send(Method, Key, Value, 1.0) ->
-    send_packet(Method, Key, Value, 1.0);
-
-send(Method, Key, Value, SampleRate) ->
-    maybe_seed(),
-    case random:uniform() =< SampleRate of
-        true  -> send_packet(Method, Key, Value, SampleRate);
-        false -> ok
-    end.
-
-send_packet(Method, Key, Value, SampleRate) ->
-    Packet = generate_packet(Method, Key, Value, SampleRate),
-    gen_server:cast(?MODULE, {send, Packet}).
-
-now_diff_ms(Timestamp) ->
-    timer:now_diff(os:timestamp(), Timestamp) div 1000.
 
 generate_packet(Method, Key, Value, SampleRate) ->
     BinSampleRate =
@@ -146,12 +140,10 @@ generate_packet(Method, Key, Value, SampleRate) ->
             [Key, <<":">>, BinValue, <<"|g">>, BinSampleRate]
     end.
 
-%% this check verifies whether a seed is already placed
-%% in the process dictionary for the random module -- if
-%% it is, we don't re-seed for any reason, except if the
-%% seed is bad (say, {X,X,X} -- usually {0,0,0} and {1,1,1}
-%% for the default seed
-maybe_seed() ->
+now_diff_ms(Timestamp) ->
+    timer:now_diff(os:timestamp(), Timestamp) div 1000.
+
+maybe_random_seed() ->
     case get(random_seed) of
         undefined ->
             random:seed(erlang:now());
@@ -160,3 +152,20 @@ maybe_seed() ->
         _ ->
             ok
     end.
+
+send(Method, Key, Value, 1) ->
+    send_packet(Method, Key, Value, 1);
+
+send(Method, Key, Value, 1.0) ->
+    send_packet(Method, Key, Value, 1.0);
+
+send(Method, Key, Value, SampleRate) ->
+    maybe_random_seed(),
+    case random:uniform() =< SampleRate of
+        true  -> send_packet(Method, Key, Value, SampleRate);
+        false -> ok
+    end.
+
+send_packet(Method, Key, Value, SampleRate) ->
+    Packet = generate_packet(Method, Key, Value, SampleRate),
+    gen_server:cast(?MODULE, {send, Packet}).
