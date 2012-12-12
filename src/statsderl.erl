@@ -15,7 +15,7 @@
 %% ------------------------------------------------------------------
 
 -export([start_link/0, increment/3, decrement/3, timing/3,
-        timing_now/3, gauge/3]).
+        timing_now/3, gauge/3, timing_fun/3]).
 
 %% ------------------------------------------------------------------
 %% gen_server Function Exports
@@ -45,6 +45,11 @@ timing_now(Key, Timestamp, SampleRate) ->
 
 gauge(Key, Value, SampleRate) ->
     send(gauge, Key, Value, SampleRate).
+
+timing_fun(Key, Fun, SampleRate) ->
+    Timestamp = os:timestamp(),
+    Fun(),
+    timing_now(Key, Timestamp, SampleRate).
 
 %% ------------------------------------------------------------------
 %% gen_server Function Definitions
