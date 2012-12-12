@@ -22,7 +22,7 @@
     timing/3,
     timing_fun/3,
     timing_now/3
-    ]).
+]).
 
 %% ------------------------------------------------------------------
 %% gen_server Function Exports
