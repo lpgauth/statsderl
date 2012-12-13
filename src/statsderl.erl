@@ -58,8 +58,9 @@ timing(Key, Value, SampleRate) ->
 
 timing_fun(Key, Fun, SampleRate) ->
     Timestamp = os:timestamp(),
-    Fun(),
-    timing_now(Key, Timestamp, SampleRate).
+    Result = Fun(),
+    timing_now(Key, Timestamp, SampleRate),
+    Result.
 
 timing_now(Key, Timestamp, SampleRate) ->
     timing(Key, now_diff_ms(Timestamp), SampleRate).
