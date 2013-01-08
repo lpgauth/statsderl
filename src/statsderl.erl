@@ -136,9 +136,9 @@ generate_packet(Method, Key, Value, SampleRate) ->
         decrement ->
             [Key, <<":-">>, BinValue, <<"|c">>, BinSampleRate];
         timing ->
-            [Key, <<":">>, BinValue, <<"|ms">>, BinSampleRate];
+            [Key, <<":">>, BinValue, <<"|ms">>];
         gauge ->
-            [Key, <<":">>, BinValue, <<"|g">>, BinSampleRate]
+            [Key, <<":">>, BinValue, <<"|g">>]
     end.
 
 now_diff_ms(Timestamp) ->
