@@ -45,16 +45,16 @@ start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
 decrement(Key, Value, SampleRate) ->
-    send(decrement, Key, Value, SampleRate).
+    maybe_send(decrement, Key, Value, SampleRate).
 
 increment(Key, Value, SampleRate) ->
-    send(increment, Key, Value, SampleRate).
+    maybe_send(increment, Key, Value, SampleRate).
 
 gauge(Key, Value, SampleRate) ->
-    send(gauge, Key, Value, SampleRate).
+    maybe_send(gauge, Key, Value, SampleRate).
 
 timing(Key, Value, SampleRate) ->
-    send(timing, Key, Value, SampleRate).
+    maybe_send(timing, Key, Value, SampleRate).
 
 timing_fun(Key, Fun, SampleRate) ->
     Timestamp = os:timestamp(),
@@ -93,16 +93,17 @@ handle_cast({send, Packet}, State = #state {
         port = Port,
         socket = Socket,
         basekey = BaseKey}) ->
-
     Message = [
         [((Port) bsr 8) band 16#ff, (Port) band 16#ff],
         [A band 16#ff, B band 16#ff, C band 16#ff, D band 16#ff],
         [BaseKey, Packet]
     ],
     try erlang:port_command(Socket, Message) of
-        true -> ok
+        true ->
+            ok
     catch
-        _:_ -> ok
+        _:_ ->
+            ok
     end,
     {noreply, State};
 handle_cast(_Msg, State) ->
@@ -121,52 +122,49 @@ code_change(_OldVsn, State, _Extra) ->
 %% Internal Function Definitions
 %% ------------------------------------------------------------------
 
-generate_packet(Method, Key, Value, SampleRate) ->
-    BinSampleRate =
-        case SampleRate >= 1 of
-            true ->
-                <<"">>;
-            false ->
-                [<<"|@">>, io_lib:format("~.3f", [SampleRate])]
-        end,
-    BinValue = list_to_binary(integer_to_list(Value)),
-    case Method of
-        increment ->
-            [Key, <<":">>, BinValue, <<"|c">>, BinSampleRate];
-        decrement ->
-            [Key, <<":-">>, BinValue, <<"|c">>, BinSampleRate];
-        timing ->
-            [Key, <<":">>, BinValue, <<"|ms">>];
-        gauge ->
-            [Key, <<":">>, BinValue, <<"|g">>]
-    end.
+format_sample_rate(SampleRate) ->
+    [<<"|@">>, io_lib:format("~.3f", [SampleRate])].
+
+generate_packet(decrement, Key, Value, SampleRate) when SampleRate >= 1 ->
+    [Key, <<":-">>, Value, <<"|c">>];
+generate_packet(decrement, Key, Value, SampleRate) ->
+    [Key, <<":-">>, Value, <<"|c">>, format_sample_rate(SampleRate)];
+generate_packet(increment, Key, Value, SampleRate) when SampleRate >= 1 ->
+    [Key, <<":">>, Value, <<"|c">>];
+generate_packet(increment, Key, Value, SampleRate) ->
+    [Key, <<":">>, Value, <<"|c">>, format_sample_rate(SampleRate)];
+generate_packet(gauge, Key, Value, _SampleRate) ->
+    [Key, <<":">>, Value, <<"|g">>];
+generate_packet(timing, Key, Value, _SampleRate) ->
+    [Key, <<":">>, Value, <<"|ms">>].
 
 now_diff_ms(Timestamp) ->
     timer:now_diff(os:timestamp(), Timestamp) div 1000.
 
-maybe_random_seed() ->
+maybe_seed() ->
     case get(random_seed) of
         undefined ->
             random:seed(erlang:now());
-        {X,X,X} ->
+        {X, X, X} ->
             random:seed(erlang:now());
         _ ->
             ok
     end.
 
-send(Method, Key, Value, 1) ->
-    send_packet(Method, Key, Value, 1);
-
-send(Method, Key, Value, 1.0) ->
-    send_packet(Method, Key, Value, 1.0);
-
-send(Method, Key, Value, SampleRate) ->
-    maybe_random_seed(),
+maybe_send(Method, Key, Value, 1) ->
+    send(Method, Key, Value, 1);
+maybe_send(Method, Key, Value, 1.0) ->
+    send(Method, Key, Value, 1.0);
+maybe_send(Method, Key, Value, SampleRate) ->
+    maybe_seed(),
     case random:uniform() =< SampleRate of
-        true  -> send_packet(Method, Key, Value, SampleRate);
-        false -> ok
+        true  ->
+            send(Method, Key, Value, SampleRate);
+        false ->
+            ok
     end.
 
-send_packet(Method, Key, Value, SampleRate) ->
-    Packet = generate_packet(Method, Key, Value, SampleRate),
+send(Method, Key, Value, SampleRate) ->
+    BinValue = list_to_binary(integer_to_list(Value)),
+    Packet = generate_packet(Method, Key, BinValue, SampleRate),
     gen_server:cast(?MODULE, {send, Packet}).
