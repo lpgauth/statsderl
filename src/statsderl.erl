@@ -78,7 +78,7 @@ init(_Args) ->
     end,
     {ok, Socket} = gen_udp:open(0, [{active, false}]),
     State = #state {
-        hostname = Hostname,
+        hostname = lookup_hostname(Hostname),
         port = Port,
         basekey = BaseKey,
         socket = Socket
@@ -168,3 +168,18 @@ send(Method, Key, Value, SampleRate) ->
     BinValue = list_to_binary(integer_to_list(Value)),
     Packet = generate_packet(Method, Key, BinValue, SampleRate),
     gen_server:cast(?MODULE, {send, Packet}).
+
+%% -------------------------------------------------------
+%% Leaves IP tuples untouched but otherwise tries to look
+%% up the value provided. This is handy when you want to
+%% use a config file and provide a hostname or IP address
+%% as a string / list
+%% -------------------------------------------------------
+lookup_hostname(Address) when is_tuple(Address) == true ->
+    Address;
+lookup_hostname(Address) ->
+    case inet:gethostbyname(Address) of
+        {ok,{_,_,_,_,_,[First|_TheRest]}} -> First;
+        _ -> {127,0,0,1}
+    end.
+
