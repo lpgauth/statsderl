@@ -164,7 +164,7 @@ maybe_send(Method, Key, Value, SampleRate) ->
             ok
     end.
 
-send(Method, Key, Value, SampleRate) when is_integer(Value) ->
+send(Method, Key, Value, SampleRate) ->
     BinValue =
         if
             is_integer(Value) ->
