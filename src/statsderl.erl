@@ -164,8 +164,14 @@ maybe_send(Method, Key, Value, SampleRate) ->
             ok
     end.
 
-send(Method, Key, Value, SampleRate) ->
-    BinValue = list_to_binary(integer_to_list(Value)),
+send(Method, Key, Value, SampleRate) when is_integer(Value) ->
+    BinValue =
+        if
+            is_integer(Value) ->
+                list_to_binary(integer_to_list(Value));
+            is_float(Value) ->
+                list_to_binary(mochinum:digits(Value))
+        end,
     Packet = generate_packet(Method, Key, BinValue, SampleRate),
     gen_server:cast(?MODULE, {send, Packet}).
 
