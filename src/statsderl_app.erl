@@ -1,14 +1,12 @@
 -module(statsderl_app).
 
 -behaviour(application).
+-export([
+    start/2,
+    stop/1
+]).
 
-%% Application callbacks
--export([start/2, stop/1]).
-
-%% ===================================================================
-%% Application callbacks
-%% ===================================================================
-
+%% application callbacks
 start(_StartType, _StartArgs) ->
     statsderl_sup:start_link().
 
