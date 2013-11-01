@@ -6,7 +6,7 @@
     kernel,
     stdlib
   ]},
-  {mod, { statsderl_app, []}},
+  {mod, {statsderl_app, []}},
   {env, [
     {hostname, {127,0,0,1}},
     {port, 8125}

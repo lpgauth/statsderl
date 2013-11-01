@@ -1,19 +1,6 @@
 -module(statsderl).
--behaviour(gen_server).
 
--define(SERVER, ?MODULE).
-
--record(state, {
-    hostname,
-    port,
-    socket,
-    basekey
-}).
-
-%% ------------------------------------------------------------------
-%% API Function Exports
-%% ------------------------------------------------------------------
-
+%% public
 -export([
     start_link/0,
     decrement/3,
@@ -24,10 +11,7 @@
     timing_now/3
 ]).
 
-%% ------------------------------------------------------------------
-%% gen_server Function Exports
-%% ------------------------------------------------------------------
-
+-behaviour(gen_server).
 -export([
     init/1,
     handle_call/3,
@@ -37,10 +21,16 @@
     code_change/3
 ]).
 
-%% ------------------------------------------------------------------
-%% API Function Definitions
-%% ------------------------------------------------------------------
+-define(SERVER, ?MODULE).
 
+-record(state, {
+    hostname,
+    port,
+    socket,
+    basekey
+}).
+
+%% public
 start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
@@ -65,10 +55,7 @@ timing_fun(Key, Fun, SampleRate) ->
 timing_now(Key, Timestamp, SampleRate) ->
     timing(Key, now_diff_ms(Timestamp), SampleRate).
 
-%% ------------------------------------------------------------------
-%% gen_server Function Definitions
-%% ------------------------------------------------------------------
-
+%% gen_server callbacks
 init(_Args) ->
     {ok, Hostname} = application:get_env(statsderl, hostname),
     {ok, Port} = application:get_env(statsderl, port),
@@ -77,33 +64,32 @@ init(_Args) ->
         undefined -> <<"">>
     end,
     {ok, Socket} = gen_udp:open(0, [{active, false}]),
-    State = #state {
+
+    {ok, #state {
         hostname = lookup_hostname(Hostname),
         port = Port,
         basekey = BaseKey,
         socket = Socket
-    },
-    {ok, State}.
+    }}.
 
 handle_call(_Request, _From, State) ->
     {noreply, ok, State}.
 
-handle_cast({send, Packet}, State = #state {
+handle_cast({send, Packet}, #state {
         hostname = {A,B,C,D},
         port = Port,
         socket = Socket,
-        basekey = BaseKey}) ->
+        basekey = BaseKey} = State) ->
+
     Message = [
         [((Port) bsr 8) band 16#ff, (Port) band 16#ff],
         [A band 16#ff, B band 16#ff, C band 16#ff, D band 16#ff],
         [BaseKey, Packet]
     ],
     try erlang:port_command(Socket, Message) of
-        true ->
-            ok
+        true -> ok
     catch
-        _:_ ->
-            ok
+        _:_ -> ok
     end,
     {noreply, State};
 handle_cast(_Msg, State) ->
@@ -118,10 +104,7 @@ terminate(_Reason, _State) ->
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
-%% ------------------------------------------------------------------
-%% Internal Function Definitions
-%% ------------------------------------------------------------------
-
+%% private
 format_sample_rate(SampleRate) ->
     [<<"|@">>, io_lib:format("~.3f", [SampleRate])].
 
@@ -138,8 +121,15 @@ generate_packet(gauge, Key, Value, _SampleRate) ->
 generate_packet(timing, Key, Value, _SampleRate) ->
     [Key, <<":">>, Value, <<"|ms">>].
 
-now_diff_ms(Timestamp) ->
-    timer:now_diff(os:timestamp(), Timestamp) div 1000.
+lookup_hostname(Address) when is_tuple(Address) ->
+    Address;
+lookup_hostname(Hostname) ->
+    case inet:gethostbyname(Hostname) of
+        {ok, {_, _, _, _, _, [Address | _]}} ->
+            Address;
+        _Else ->
+            {127, 0, 0, 1}
+    end.
 
 maybe_seed() ->
     case get(random_seed) of
@@ -164,28 +154,14 @@ maybe_send(Method, Key, Value, SampleRate) ->
             ok
     end.
 
-send(Method, Key, Value, SampleRate) ->
-    BinValue =
-        if
-            is_integer(Value) ->
-                list_to_binary(integer_to_list(Value));
-            is_float(Value) ->
-                list_to_binary(mochinum:digits(Value))
-        end,
+now_diff_ms(Timestamp) ->
+    timer:now_diff(os:timestamp(), Timestamp) div 1000.
+
+send(Method, Key, Value, SampleRate) when is_integer(Value) ->
+    BinValue = list_to_binary(integer_to_list(Value)),
+    Packet = generate_packet(Method, Key, BinValue, SampleRate),
+    gen_server:cast(?MODULE, {send, Packet});
+send(Method, Key, Value, SampleRate) when is_float(Value) ->
+    BinValue = list_to_binary(io_lib:format("~.2f", [Value])),
     Packet = generate_packet(Method, Key, BinValue, SampleRate),
     gen_server:cast(?MODULE, {send, Packet}).
-
-%% -------------------------------------------------------
-%% Leaves IP tuples untouched but otherwise tries to look
-%% up the value provided. This is handy when you want to
-%% use a config file and provide a hostname or IP address
-%% as a string / list
-%% -------------------------------------------------------
-lookup_hostname(Address) when is_tuple(Address) == true ->
-    Address;
-lookup_hostname(Address) ->
-    case inet:gethostbyname(Address) of
-        {ok,{_,_,_,_,_,[First|_TheRest]}} -> First;
-        _ -> {127,0,0,1}
-    end.
-
