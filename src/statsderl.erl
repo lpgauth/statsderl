@@ -144,9 +144,9 @@ now_diff_ms(Timestamp) ->
 maybe_seed() ->
     case get(random_seed) of
         undefined ->
-            random:seed(erlang:now());
+            random:seed(os:timestamp());
         {X, X, X} ->
-            random:seed(erlang:now());
+            random:seed(os:timestamp());
         _ ->
             ok
     end.
