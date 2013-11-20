@@ -59,10 +59,7 @@ timing_now(Key, Timestamp, SampleRate) ->
 init(_Args) ->
     {ok, Hostname} = application:get_env(statsderl, hostname),
     {ok, Port} = application:get_env(statsderl, port),
-    BaseKey = case application:get_env(statsderl, base_key) of
-        {ok, Key} -> [Key, $.];
-        undefined -> <<"">>
-    end,
+    BaseKey = get_base_key(application:get_env(statsderl, base_key)),
     {ok, Socket} = gen_udp:open(0, [{active, false}]),
 
     {ok, #state {
@@ -105,6 +102,22 @@ code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
 %% private
+get_base_key({ok, hostname}) ->
+    {ok, Hostname} = inet:gethostname(),
+    [Hostname, $.];
+get_base_key({ok, sname}) ->
+    Name = atom_to_list(node()),
+    SName = string:sub_word(Name, 1, $@),
+    [SName, $.];
+get_base_key({ok, name}) ->
+    Name = atom_to_list(node()),
+    Value = re:replace(Name, "@", ".", [global, {return, list}]),
+    [Value, $.];
+get_base_key({ok, Key}) ->
+    [Key, $.];
+get_base_key(undefined) ->
+    <<"">>.
+
 format_sample_rate(SampleRate) ->
     [<<"|@">>, io_lib:format("~.3f", [SampleRate])].
 
