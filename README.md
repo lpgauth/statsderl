@@ -11,6 +11,12 @@ For multi-node setups, it might be useful to be able to define a basic key based
 
 No need to split the keys -- the `.` as a separator is added automatically.
 
+Alternatively, you can use one of the following atoms:
+
+ * `hostname` -- use the hostname returned by `inet:gethostname/0`.
+ * `sname` -- use the short node name (passed to `erl -sname`; e.g. the "nonode" in "nonode@nohost").
+ * `name` -- use the long node name (passed to `erl -name`; e.g. "nonode@nohost").
+
 #### Usage:
     application:start(statsderl).
 
