@@ -2,10 +2,12 @@
 
 %% public
 -export([
-    start_link/0,
     decrement/3,
     gauge/3,
     increment/3,
+    pool_size/0,
+    server_name/1,
+    start_link/1,
     timing/3,
     timing_fun/3,
     timing_now/3
@@ -21,6 +23,7 @@
     code_change/3
 ]).
 
+-define(POOL_SIZE, 8).
 -define(SERVER, ?MODULE).
 
 -record(state, {
@@ -31,17 +34,23 @@
 }).
 
 %% public
-start_link() ->
-    gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
-
 decrement(Key, Value, SampleRate) ->
     maybe_send(decrement, Key, Value, SampleRate).
+
+gauge(Key, Value, SampleRate) ->
+    maybe_send(gauge, Key, Value, SampleRate).
 
 increment(Key, Value, SampleRate) ->
     maybe_send(increment, Key, Value, SampleRate).
 
-gauge(Key, Value, SampleRate) ->
-    maybe_send(gauge, Key, Value, SampleRate).
+pool_size() ->
+    ?POOL_SIZE.
+
+server_name(N) ->
+    list_to_atom("statsderl_" ++ integer_to_list(N)).
+
+start_link(Name) ->
+    gen_server:start_link({local, Name}, ?MODULE, [], []).
 
 timing(Key, Value, SampleRate) ->
     maybe_send(timing, Key, Value, SampleRate).
@@ -170,11 +179,15 @@ maybe_send(Method, Key, Value, SampleRate) ->
 now_diff_ms(Timestamp) ->
     timer:now_diff(os:timestamp(), Timestamp) div 1000.
 
+random_server() ->
+    Random = erlang:phash2({os:timestamp(), self()}, ?POOL_SIZE) + 1,
+    server_name(Random).
+
 send(Method, Key, Value, SampleRate) when is_integer(Value) ->
     BinValue = list_to_binary(integer_to_list(Value)),
     Packet = generate_packet(Method, Key, BinValue, SampleRate),
-    gen_server:cast(?MODULE, {send, Packet});
+    gen_server:cast(random_server(), {send, Packet});
 send(Method, Key, Value, SampleRate) when is_float(Value) ->
     BinValue = list_to_binary(io_lib:format("~.2f", [Value])),
     Packet = generate_packet(Method, Key, BinValue, SampleRate),
-    gen_server:cast(?MODULE, {send, Packet}).
+    gen_server:cast(random_server(), {send, Packet}).

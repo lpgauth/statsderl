@@ -10,7 +10,7 @@
     init/1
 ]).
 
--define(CHILD(I, Type), {I, {I, start_link, []}, permanent, 5000, Type, [I]}).
+-define(CHILD(Name, Mod), {Name, {Mod, start_link, [Name]}, permanent, 5000, worker, [Mod]}).
 
 %% public
 start_link() ->
@@ -18,6 +18,12 @@ start_link() ->
 
 %% supervisor callbacks
 init(_Args) ->
-    {ok, {{one_for_one, 5, 10}, [
-        ?CHILD(statsderl, worker)
-    ]}}.
+    PoolSize = statsderl:pool_size(),
+    {ok, {{one_for_one, 5, 10}, child_specs(PoolSize)}}.
+
+%% private
+child_specs(0) ->
+    [];
+child_specs(N) ->
+    Name = statsderl:server_name(N),
+    [?CHILD(Name, statsderl) | child_specs(N - 1)].
