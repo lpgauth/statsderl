@@ -23,7 +23,7 @@
     code_change/3
 ]).
 
--define(POOL_SIZE, 8).
+-define(POOL_SIZE, 2).
 -define(SERVER, ?MODULE).
 
 -record(state, {
