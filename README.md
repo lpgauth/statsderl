@@ -22,7 +22,7 @@ Alternatively, you can use one of the following atoms:
 
 #### Methods:
 
-["tag"] is to add DataDog tags to the stat.
+`["tag"]` is used to add [DataDog tags](https://github.com/DataDog/dogapi/blob/master/src/dogapi/stats/statsd.py#L30) to the stat.
 
 ##### Decrement
     statsderl:decrement("test.decrement", 1, 0.5).
