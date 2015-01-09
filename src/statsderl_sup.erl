@@ -18,12 +18,12 @@ start_link() ->
 
 %% supervisor callbacks
 init(_Args) ->
-    PoolSize = statsderl:pool_size(),
+    PoolSize = statsderl_server:pool_size(),
     {ok, {{one_for_one, 5, 10}, child_specs(PoolSize)}}.
 
 %% private
 child_specs(0) ->
     [];
 child_specs(N) ->
-    Name = statsderl:server_name(N),
-    [?CHILD(Name, statsderl) | child_specs(N - 1)].
+    Name = statsderl_server:server_name(N),
+    [?CHILD(Name, statsderl_server) | child_specs(N - 1)].

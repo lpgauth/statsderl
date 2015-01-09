@@ -1,157 +1,109 @@
 -module(statsderl).
 
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+-endif.
+
 %% public
 -export([
     decrement/3,
+    decrement/4,
     gauge/3,
+    gauge/4,
     increment/3,
-    pool_size/0,
-    server_name/1,
-    start_link/1,
+    increment/4,
     timing/3,
+    timing/4,
     timing_fun/3,
-    timing_now/3
+    timing_fun/4,
+    timing_now/3,
+    timing_now/4
 ]).
 
--behaviour(gen_server).
--export([
-    init/1,
-    handle_call/3,
-    handle_cast/2,
-    handle_info/2,
-    terminate/2,
-    code_change/3
-]).
-
--define(POOL_SIZE, 2).
--define(SERVER, ?MODULE).
-
--record(state, {
-    hostname,
-    port,
-    socket,
-    basekey
-}).
+-inline([now_diff_ms/1]).
 
 %% public
 decrement(Key, Value, SampleRate) ->
-    maybe_send(decrement, Key, Value, SampleRate).
+    maybe_send(decrement, Key, Value, SampleRate, []).
+
+decrement(Key, Value, SampleRate, Tags) ->
+    maybe_send(decrement, Key, Value, SampleRate, Tags).
 
 gauge(Key, Value, SampleRate) ->
-    maybe_send(gauge, Key, Value, SampleRate).
+    maybe_send(gauge, Key, Value, SampleRate, []).
+
+gauge(Key, Value, SampleRate, Tags) ->
+    maybe_send(gauge, Key, Value, SampleRate, Tags).
 
 increment(Key, Value, SampleRate) ->
-    maybe_send(increment, Key, Value, SampleRate).
+    maybe_send(increment, Key, Value, SampleRate, []).
 
-pool_size() ->
-    ?POOL_SIZE.
-
-server_name(N) ->
-    list_to_atom("statsderl_" ++ integer_to_list(N)).
-
-start_link(Name) ->
-    gen_server:start_link({local, Name}, ?MODULE, [], []).
+increment(Key, Value, SampleRate, Tags) ->
+    maybe_send(increment, Key, Value, SampleRate, Tags).
 
 timing(Key, Value, SampleRate) ->
-    maybe_send(timing, Key, Value, SampleRate).
+    timing(Key, Value, SampleRate, []).
+
+timing(Key, Value, SampleRate, Tags) ->
+    maybe_send(timing, Key, Value, SampleRate, Tags).
 
 timing_fun(Key, Fun, SampleRate) ->
+    timing_fun(Key, Fun, SampleRate, []).
+
+timing_fun(Key, Fun, SampleRate, Tags) ->
     Timestamp = os:timestamp(),
     Result = Fun(),
-    timing_now(Key, Timestamp, SampleRate),
+    timing_now(Key, Timestamp, SampleRate, Tags),
     Result.
 
 timing_now(Key, Timestamp, SampleRate) ->
-    timing(Key, now_diff_ms(Timestamp), SampleRate).
+    timing_now(Key, Timestamp, SampleRate, []).
 
-%% gen_server callbacks
-init(_Args) ->
-    {ok, Hostname} = application:get_env(statsderl, hostname),
-    {ok, Port} = application:get_env(statsderl, port),
-    BaseKey = get_base_key(application:get_env(statsderl, base_key)),
-    {ok, Socket} = gen_udp:open(0, [{active, false}]),
+timing_now(Key, Timestamp, SampleRate, Tags) ->
+    Duration = now_diff_ms(Timestamp),
+    timing(Key, Duration, SampleRate, Tags).
 
-    {ok, #state {
-        hostname = lookup_hostname(Hostname),
-        port = Port,
-        basekey = BaseKey,
-        socket = Socket
-    }}.
-
-handle_call(_Request, _From, State) ->
-    {noreply, ok, State}.
-
-handle_cast({send, Packet}, #state {
-        hostname = {A,B,C,D},
-        port = Port,
-        socket = Socket,
-        basekey = BaseKey} = State) ->
-
-    Message = [
-        [((Port) bsr 8) band 16#ff, (Port) band 16#ff],
-        [A band 16#ff, B band 16#ff, C band 16#ff, D band 16#ff],
-        [BaseKey, Packet]
-    ],
-    try erlang:port_command(Socket, Message) of
-        true -> ok
-    catch
-        _:_ -> ok
-    end,
-    {noreply, State};
-handle_cast(_Msg, State) ->
-    {noreply, State}.
-
-handle_info(_Info, State) ->
-    {noreply, State}.
-
-terminate(_Reason, _State) ->
-    ok.
-
-code_change(_OldVsn, State, _Extra) ->
-    {ok, State}.
+now_diff_ms(Timestamp) ->
+    timer:now_diff(os:timestamp(), Timestamp) div 1000.
 
 %% private
-get_base_key({ok, hostname}) ->
-    {ok, Hostname} = inet:gethostname(),
-    [Hostname, $.];
-get_base_key({ok, sname}) ->
-    Name = atom_to_list(node()),
-    SName = string:sub_word(Name, 1, $@),
-    [SName, $.];
-get_base_key({ok, name}) ->
-    Name = atom_to_list(node()),
-    Value = re:replace(Name, "@", ".", [global, {return, list}]),
-    [Value, $.];
-get_base_key({ok, Key}) ->
-    [Key, $.];
-get_base_key(undefined) ->
-    <<"">>.
+format(value, Value) when is_integer(Value) ->
+    integer_to_list(Value);
+format(value, Value) when is_float(Value) ->
+    io_lib:format("~.2f", [Value]);
+format(decrement, Value) ->
+    [<<":-">>, format(value, Value), <<"|c">>];
+format(increment, Value) ->
+    [<<":">>, format(value, Value), <<"|c">>];
+format(gauge, Value) ->
+    [<<":">>, format(value, Value), <<"|g">>];
+format(timing, Value) ->
+    [<<":">>, format(value, Value), <<"|ms">>];
+format(sample_rate, SampleRate) when SampleRate >= 1 ->
+    [];
+format(sample_rate, SampleRate) when SampleRate < 1 ->
+    [<<"|@">>, io_lib:format("~.3f", [SampleRate * 1.0])];
+format(tag, [_|_] = Tags) ->
+    [[_, H] | T] = [[$,, X] || X <- Tags],
+    [$|, $#, H | T];
+format(tag, []) ->
+    [].
 
-format_sample_rate(SampleRate) ->
-    [<<"|@">>, io_lib:format("~.3f", [SampleRate])].
+generate_packet(Type, Key, Value, SampleRate, Tags) ->
+    [Key, format(Type, Value), format(sample_rate, SampleRate), format(tag, Tags)].
 
-generate_packet(decrement, Key, Value, SampleRate) when SampleRate >= 1 ->
-    [Key, <<":-">>, Value, <<"|c">>];
-generate_packet(decrement, Key, Value, SampleRate) ->
-    [Key, <<":-">>, Value, <<"|c">>, format_sample_rate(SampleRate)];
-generate_packet(increment, Key, Value, SampleRate) when SampleRate >= 1 ->
-    [Key, <<":">>, Value, <<"|c">>];
-generate_packet(increment, Key, Value, SampleRate) ->
-    [Key, <<":">>, Value, <<"|c">>, format_sample_rate(SampleRate)];
-generate_packet(gauge, Key, Value, _SampleRate) ->
-    [Key, <<":">>, Value, <<"|g">>];
-generate_packet(timing, Key, Value, _SampleRate) ->
-    [Key, <<":">>, Value, <<"|ms">>].
-
-lookup_hostname(Address) when is_tuple(Address) ->
-    Address;
-lookup_hostname(Hostname) ->
-    case inet:gethostbyname(Hostname) of
-        {ok, {_, _, _, _, _, [Address | _]}} ->
-            Address;
-        _Else ->
-            {127, 0, 0, 1}
-    end.
+-ifdef(TEST).
+generate_packet_test_() ->
+    [?_assertEqual(<<"key:-1|c">>,           iolist_to_binary(generate_packet(decrement,  "key", 1, 1, [])))
+    ,?_assertEqual(<<"key:-2|c|#tag1">>,     iolist_to_binary(generate_packet(decrement,  "key", 2, 1, ["tag1"])))
+    ,?_assertEqual(<<"key:3|c">>,            iolist_to_binary(generate_packet(increment,  "key", 3, 1, [])))
+    ,?_assertEqual(<<"key:4|c|#tag1,tag2">>, iolist_to_binary(generate_packet(increment,  "key", 4, 1, ["tag1", "tag2"])))
+    ,?_assertEqual(<<"key:5|g|#tag3">>,      iolist_to_binary(generate_packet(gauge,      "key", 5, 1, ["tag3"])))
+    ,?_assertEqual(<<"key:6|ms|#ahhhh">>,    iolist_to_binary(generate_packet(timing,     "key", 6, 1, ["ahhhh"])))
+    ,?_assertEqual(<<"key:7|g">>,            iolist_to_binary(generate_packet(gauge,      "key", 7, 1, [])))
+    ,?_assertEqual(<<"key:8|ms">>,           iolist_to_binary(generate_packet(timing,     "key", 8, 1, [])))
+    ].
+-endif.
 
 maybe_seed() ->
     case get(random_seed) of
@@ -163,31 +115,18 @@ maybe_seed() ->
             ok
     end.
 
-maybe_send(Method, Key, Value, 1) ->
-    send(Method, Key, Value, 1);
-maybe_send(Method, Key, Value, 1.0) ->
-    send(Method, Key, Value, 1.0);
-maybe_send(Method, Key, Value, SampleRate) ->
+maybe_send(Method, Key, Value, SampleRate, Tags) when SampleRate >= 1 ->
+    send(Method, Key, Value, SampleRate, Tags);
+maybe_send(Method, Key, Value, SampleRate, Tags) ->
     maybe_seed(),
     case random:uniform() =< SampleRate of
         true  ->
-            send(Method, Key, Value, SampleRate);
+            send(Method, Key, Value, SampleRate, Tags);
         false ->
             ok
     end.
 
-now_diff_ms(Timestamp) ->
-    timer:now_diff(os:timestamp(), Timestamp) div 1000.
-
-random_server() ->
-    Random = erlang:phash2({os:timestamp(), self()}, ?POOL_SIZE) + 1,
-    server_name(Random).
-
-send(Method, Key, Value, SampleRate) when is_integer(Value) ->
-    BinValue = list_to_binary(integer_to_list(Value)),
-    Packet = generate_packet(Method, Key, BinValue, SampleRate),
-    gen_server:cast(random_server(), {send, Packet});
-send(Method, Key, Value, SampleRate) when is_float(Value) ->
-    BinValue = list_to_binary(io_lib:format("~.2f", [Value])),
-    Packet = generate_packet(Method, Key, BinValue, SampleRate),
-    gen_server:cast(random_server(), {send, Packet}).
+send(Method, Key, Value, SampleRate, Tags) ->
+    Packet = generate_packet(Method, Key, Value, SampleRate, Tags),
+    ServerName = statsderl_server:random_server_name(),
+    gen_server:cast(ServerName, {send, Packet}).

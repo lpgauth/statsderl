@@ -1,4 +1,5 @@
-.PHONY: deps doc
+.DEFAULT_GOAL =  all
+.PHONY: all compile deps clean distclean test dialyzer doc
 
 all: deps compile
 
