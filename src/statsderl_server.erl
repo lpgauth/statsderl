@@ -19,7 +19,6 @@
 ]).
 
 -inline([pool_size/0]).
--inline([format/2]).
 
 -record(state, {
     hostname,
