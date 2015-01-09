@@ -1,5 +1,5 @@
 .DEFAULT_GOAL =  all
-.PHONY: all compile deps clean distclean test dialyzer doc
+.PHONY: all compile deps clean distclean check test dialyzer doc
 
 all: deps compile
 
@@ -15,7 +15,7 @@ clean:
 distclean: clean
 				./rebar delete-deps
 
-test:
+check test: compile
 				./rebar eunit
 
 dialyzer: compile
