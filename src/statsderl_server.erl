@@ -34,10 +34,10 @@ pool_size() ->
 
 random_server_name() ->
     Random = erlang:phash2({os:timestamp(), self()}, pool_size()),
-    server_name(Random).
+    server_name(Random + 1).
 
-server_name(0) -> statsderl_0;
 server_name(1) -> statsderl_1;
+server_name(2) -> statsderl_2;
 server_name(N) -> list_to_atom("statsderl_" ++ integer_to_list(N)).
 
 start_link(Name) ->
