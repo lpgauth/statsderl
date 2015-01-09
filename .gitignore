@@ -7,4 +7,3 @@
 *.swp
 erl_crash.dump
 /.eunit
-src/statsderl_socket.erl
