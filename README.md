@@ -21,21 +21,30 @@ Alternatively, you can use one of the following atoms:
     application:start(statsderl).
 
 #### Methods:
+
+`["tag"]` is used to add [DataDog tags](https://github.com/DataDog/dogapi/blob/master/src/dogapi/stats/statsd.py#L30) to the stat.
+
 ##### Decrement
     statsderl:decrement("test.decrement", 1, 0.5).
+    statsderl:decrement("test.decrement", 1, 0.5, ["tag"]).
     
 ##### Increment
     statsderl:increment("test.increment", 1, 0.5).
+    statsderl:increment("test.increment", 1, 0.5, ["tag"]).
 
 ##### Gauge
     statsderl:gauge("test.gauge", 333, 1.0).
+    statsderl:gauge("test.gauge", 333, 1.0, ["tag"]).
 
 ##### Timing
     statsderl:timing("test.timing", 5, 0.5).
+    statsderl:timing("test.timing", 5, 0.5, ["tag"]).
 
 ##### Timing fun
     statsderl:timing_fun("test.timing", fun() -> timer:sleep(100) end, 0.5).
+    statsderl:timing_fun("test.timing", fun() -> timer:sleep(100) end, 0.5, ["tag"]).
 
 ##### Timing now
-    Timestamp = erlang:now(),
+    Timestamp = erlang:now().
     statsderl:timing_now("test.timing", Timestamp, 0.5).
+    statsderl:timing_now("test.timing", Timestamp, 0.5, ["tag"]).
