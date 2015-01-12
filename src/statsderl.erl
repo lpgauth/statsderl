@@ -30,7 +30,8 @@
     hostname,
     port,
     socket,
-    basekey
+    basekey,
+    header
 }).
 
 %% public
@@ -70,28 +71,24 @@ init(_Args) ->
     {ok, Port} = application:get_env(statsderl, port),
     BaseKey = get_base_key(application:get_env(statsderl, base_key)),
     {ok, Socket} = gen_udp:open(0, [{active, false}]),
-
+    {A,B,C,D} = lookup_hostname(Hostname),
+    Header =  [<<((Port bsr 8) band 16#ff):8/integer, ((Port) band 16#ff):8/integer, (A band 16#ff):8, (B band 16#ff):8, (C band 16#ff):8, (D band 16#ff):8>>, BaseKey],
     {ok, #state {
-        hostname = lookup_hostname(Hostname),
+        hostname = {A,B,C,D},
         port = Port,
         basekey = BaseKey,
-        socket = Socket
+        socket = Socket,
+        header = Header
     }}.
 
 handle_call(_Request, _From, State) ->
     {noreply, ok, State}.
 
 handle_cast({send, Packet}, #state {
-        hostname = {A,B,C,D},
-        port = Port,
         socket = Socket,
-        basekey = BaseKey} = State) ->
+        header = Header} = State) ->
 
-    Message = [
-        [((Port) bsr 8) band 16#ff, (Port) band 16#ff],
-        [A band 16#ff, B band 16#ff, C band 16#ff, D band 16#ff],
-        [BaseKey, Packet]
-    ],
+    Message = [Header, Packet],
     try erlang:port_command(Socket, Message) of
         true -> ok
     catch
