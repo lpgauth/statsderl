@@ -46,50 +46,48 @@ app_test() ->
     application:start(stdlib),
     application:load(statsderl),
     application:set_env(statsderl, socket_module, ?MODULE),
-    application:start(statsderl),
+    ?assertEqual(ok, application:start(statsderl)),
     ?check_and_reset(statsderl_server:pool_size(), 0),
 
-    Key = "key",
-    Value = 1,
     SampleRate = 1,
-    Tags = ["tag"],
+    Tags = ["dummy.tag"],
     Fun = fun erlang:yield/0,
     Timestamp = os:timestamp(),
 
-    statsderl:decrement(Key, Value, SampleRate),
+    statsderl:decrement("statsderl.dummy.counter", 1, SampleRate),
     ?check_and_reset(0, 1),
 
-    statsderl:decrement(Key, Value, SampleRate, Tags),
+    statsderl:decrement("statsderl.dummy.counter", 1, SampleRate, Tags),
     ?check_and_reset(0, 1),
 
-    statsderl:gauge(Key, Value, SampleRate),
+    statsderl:gauge("statsderl.dummy.gauge", 1, SampleRate),
     ?check_and_reset(0, 1),
 
-    statsderl:gauge(Key, Value, SampleRate, Tags),
+    statsderl:gauge("statsderl.dummy.gauge", 1, SampleRate, Tags),
     ?check_and_reset(0, 1),
 
-    statsderl:increment(Key, Value, SampleRate),
+    statsderl:increment("statsderl.dummy.counter", 1, SampleRate),
     ?check_and_reset(0, 1),
 
-    statsderl:increment(Key, Value, SampleRate, Tags),
+    statsderl:increment("statsderl.dummy.counter", 1, SampleRate, Tags),
     ?check_and_reset(0, 1),
 
-    statsderl:timing(Key, Value, SampleRate),
+    statsderl:timing("statsderl.dummy.counter", 1, SampleRate),
     ?check_and_reset(0, 1),
 
-    statsderl:timing(Key, Value, SampleRate, Tags),
+    statsderl:timing("statsderl.dummy.counter", 1, SampleRate, Tags),
     ?check_and_reset(0, 1),
 
-    statsderl:timing_fun(Key, Fun, SampleRate),
+    statsderl:timing_fun("statsderl.dummy.timing", Fun, SampleRate),
     ?check_and_reset(0, 1),
 
-    statsderl:timing_fun(Key, Fun, SampleRate, Tags),
+    statsderl:timing_fun("statsderl.dummy.timing", Fun, SampleRate, Tags),
     ?check_and_reset(0, 1),
 
-    statsderl:timing_now(Key, Timestamp, SampleRate),
+    statsderl:timing_now("statsderl.dummy.timing", Timestamp, SampleRate),
     ?check_and_reset(0, 1),
 
-    statsderl:timing_now(Key, Timestamp, SampleRate, Tags),
+    statsderl:timing_now("statsderl.dummy.timing", Timestamp, SampleRate, Tags),
     ?check_and_reset(0, 1),
 
     ok.

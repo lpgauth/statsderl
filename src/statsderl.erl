@@ -98,10 +98,10 @@ generate_packet_test_() ->
     ,?_assertEqual(<<"key:-2|c|#tag1">>,     iolist_to_binary(generate_packet(decrement,  "key", 2, 1, ["tag1"])))
     ,?_assertEqual(<<"key:3|c">>,            iolist_to_binary(generate_packet(increment,  "key", 3, 1, [])))
     ,?_assertEqual(<<"key:4|c|#tag1,tag2">>, iolist_to_binary(generate_packet(increment,  "key", 4, 1, ["tag1", "tag2"])))
-    ,?_assertEqual(<<"key:5|g|#tag3">>,      iolist_to_binary(generate_packet(gauge,      "key", 5, 1, ["tag3"])))
-    ,?_assertEqual(<<"key:6|ms|#ahhhh">>,    iolist_to_binary(generate_packet(timing,     "key", 6, 1, ["ahhhh"])))
-    ,?_assertEqual(<<"key:7|g">>,            iolist_to_binary(generate_packet(gauge,      "key", 7, 1, [])))
-    ,?_assertEqual(<<"key:8|ms">>,           iolist_to_binary(generate_packet(timing,     "key", 8, 1, [])))
+    ,?_assertEqual(<<"key:5|g">>,            iolist_to_binary(generate_packet(gauge,      "key", 5, 1, [])))
+    ,?_assertEqual(<<"key:6|g|#tag3">>,      iolist_to_binary(generate_packet(gauge,      "key", 6, 1, ["tag3"])))
+    ,?_assertEqual(<<"key:7|ms">>,           iolist_to_binary(generate_packet(timing,     "key", 7, 1, [])))
+    ,?_assertEqual(<<"key:8|ms|#ahhhh">>,    iolist_to_binary(generate_packet(timing,     "key", 8, 1, ["ahhhh"])))
     ].
 -endif.
 
