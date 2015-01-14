@@ -72,11 +72,7 @@ handle_cast({send, Packet}, #state {
         [BaseKey, Packet]
     ],
     SendFun = erlang:get(socket_send_fun),
-    try
-        R = SendFun(Socket, Message), %% we don't care if it succeeds or not
-        io:format(user, "~n~w -> ~w", [Message, R])
-    catch C:E -> erlang:display({C,E})
-    end,
+    catch SendFun(Socket, Message), %% we don't care if it succeeds or not
     {noreply, State};
 handle_cast(_Msg, State) ->
     {noreply, State}.
