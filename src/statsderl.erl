@@ -4,6 +4,7 @@
 -export([
     decrement/3,
     gauge/3,
+    gauge_delta/3,
     increment/3,
     pool_size/0,
     server_name/1,
@@ -40,6 +41,9 @@ decrement(Key, Value, SampleRate) ->
 
 gauge(Key, Value, SampleRate) ->
     maybe_send(gauge, Key, Value, SampleRate).
+
+gauge_delta(Key, Value, SampleRate) ->
+    maybe_send(gauge_delta, Key, Value, SampleRate).
 
 increment(Key, Value, SampleRate) ->
     maybe_send(increment, Key, Value, SampleRate).
@@ -127,18 +131,22 @@ get_base_key(undefined) ->
 format_sample_rate(SampleRate) ->
     [<<"|@">>, io_lib:format("~.3f", [SampleRate])].
 
-generate_packet(decrement, Key, Value, SampleRate) when SampleRate >= 1 ->
-    [Key, <<":-">>, Value, <<"|c">>];
-generate_packet(decrement, Key, Value, SampleRate) ->
-    [Key, <<":-">>, Value, <<"|c">>, format_sample_rate(SampleRate)];
-generate_packet(increment, Key, Value, SampleRate) when SampleRate >= 1 ->
-    [Key, <<":">>, Value, <<"|c">>];
-generate_packet(increment, Key, Value, SampleRate) ->
-    [Key, <<":">>, Value, <<"|c">>, format_sample_rate(SampleRate)];
-generate_packet(gauge, Key, Value, _SampleRate) ->
-    [Key, <<":">>, Value, <<"|g">>];
-generate_packet(timing, Key, Value, _SampleRate) ->
-    [Key, <<":">>, Value, <<"|ms">>].
+generate_packet(decrement, Key, BinValue, SampleRate, _NumValue) when SampleRate >= 1 ->
+    [Key, <<":-">>, BinValue, <<"|c">>];
+generate_packet(decrement, Key, BinValue, SampleRate, _NumValue) ->
+    [Key, <<":-">>, BinValue, <<"|c">>, format_sample_rate(SampleRate)];
+generate_packet(increment, Key, BinValue, SampleRate, _NumValue) when SampleRate >= 1 ->
+    [Key, <<":">>, BinValue, <<"|c">>];
+generate_packet(increment, Key, BinValue, SampleRate, _NumValue) ->
+    [Key, <<":">>, BinValue, <<"|c">>, format_sample_rate(SampleRate)];
+generate_packet(gauge, Key, BinValue, _SampleRate, _NumValue) ->
+    [Key, <<":">>, BinValue, <<"|g">>];
+generate_packet(gauge_delta, Key, BinValue, _SampleRate, NumValue) when NumValue >= 0 ->
+    [Key, <<":+">>, BinValue, <<"|g">>];
+generate_packet(gauge_delta, Key, BinValue, _SampleRate, _NumValue)->
+    [Key, <<":">>, BinValue, <<"|g">>];
+generate_packet(timing, Key, BinValue, _SampleRate, _NumValue) ->
+    [Key, <<":">>, BinValue, <<"|ms">>].
 
 lookup_hostname(Address) when is_tuple(Address) ->
     Address;
@@ -182,9 +190,9 @@ random_server() ->
 
 send(Method, Key, Value, SampleRate) when is_integer(Value) ->
     BinValue = list_to_binary(integer_to_list(Value)),
-    Packet = generate_packet(Method, Key, BinValue, SampleRate),
+    Packet = generate_packet(Method, Key, BinValue, SampleRate, Value),
     gen_server:cast(random_server(), {send, Packet});
 send(Method, Key, Value, SampleRate) when is_float(Value) ->
     BinValue = list_to_binary(io_lib:format("~.2f", [Value])),
-    Packet = generate_packet(Method, Key, BinValue, SampleRate),
+    Packet = generate_packet(Method, Key, BinValue, SampleRate, Value),
     gen_server:cast(random_server(), {send, Packet}).
