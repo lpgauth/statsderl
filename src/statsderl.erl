@@ -123,7 +123,16 @@ get_base_key({ok, name}) ->
     Value = re:replace(Name, "@", ".", [global, {return, list}]),
     [Value, $.];
 get_base_key({ok, Key}) ->
-    [Key, $.];
+    IsPrintable = io_lib:printable_list(Key),
+    if
+        Key == [] ->
+            [];
+        IsPrintable == true ->
+            [Key, $.];
+        is_list(Key) ->
+            [H|T] = Key,
+            get_base_key({ok, H}) ++ get_base_key({ok, T})
+    end;
 get_base_key(undefined) ->
     <<"">>.
 
