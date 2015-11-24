@@ -1,14 +1,12 @@
 {application, statsderl, [
-  {description, "StatsD client"},
-  {vsn, "0.3.6"},
+  {description, "statsd client"},
+  {vsn, "0.4.0"},
   {registered, []},
   {applications, [
+    erts,
     kernel,
     stdlib
   ]},
   {mod, {statsderl_app, []}},
-  {env, [
-    {hostname, {127,0,0,1}},
-    {port, 8125}
-  ]}
+  {env, []}
 ]}.

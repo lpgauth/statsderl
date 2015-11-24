@@ -1,0 +1,12 @@
+-define(APP, statsderl).
+-define(CHILD(Name, Mod), {Name, {Mod, start_link, [Name]}, permanent, 5000, worker, [Mod]}).
+-define(DEFAULT_BASEKEY, undefined).
+-define(DEFAULT_HOSTNAME, {127, 0, 0, 1}).
+-define(DEFAULT_PORT, 8125).
+-define(ENV_BASEKEY, base_key).
+-define(ENV_HOSTNAME, hostname).
+-define(ENV_PORT, port).
+-define(POOL_SIZE, 4).
+
+-type base_key() :: hostname | name | sname | undefined | list() | binary().
+-type op_code() :: decrement | gauge | gauge_decrement | gauge_increment | increment | timing.

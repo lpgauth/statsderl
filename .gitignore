@@ -1,9 +1,1 @@
-/ebin
-/deps
-/logs
-/log
-.DS_Store
-/test/*.beam
-*.swp
-erl_crash.dump
-/.eunit
+_build

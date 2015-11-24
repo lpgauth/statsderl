@@ -1,4 +1,5 @@
 -module(statsderl_sup).
+-include("statsderl.hrl").
 
 %% public
 -export([
@@ -10,20 +11,22 @@
     init/1
 ]).
 
--define(CHILD(Name, Mod), {Name, {Mod, start_link, [Name]}, permanent, 5000, worker, [Mod]}).
 
 %% public
+-spec start_link() -> {ok, pid()}.
+
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 %% supervisor callbacks
+-spec init([]) -> {ok, {{one_for_one, 5, 10}, [supervisor:child_spec()]}}.
+
 init(_Args) ->
-    PoolSize = statsderl:pool_size(),
-    {ok, {{one_for_one, 5, 10}, child_specs(PoolSize)}}.
+    {ok, {{one_for_one, 5, 10}, child_specs(?POOL_SIZE)}}.
 
 %% private
 child_specs(0) ->
     [];
 child_specs(N) ->
-    Name = statsderl:server_name(N),
-    [?CHILD(Name, statsderl) | child_specs(N - 1)].
+    Name = statsderl_utils:server_name(N),
+    [?CHILD(Name, statsderl_server) | child_specs(N - 1)].

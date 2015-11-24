@@ -1,24 +1,27 @@
-.PHONY: deps doc
+REBAR=./rebar3
 
-all: deps compile
-
-compile:
-				./rebar compile
-
-deps:
-				./rebar get-deps
+all: compile
 
 clean:
-				./rebar clean
+	@echo "Running rebar3 clean..."
+	@$(REBAR) clean -a
 
-distclean: clean
-				./rebar delete-deps
+compile:
+	@echo "Running rebar3 compile..."
+	@$(REBAR) compile
 
-test:
-				./rebar eunit
+dialyzer:
+	@echo "Running rebar3 dialyze..."
+	@$(REBAR) dialyzer
 
-dialyzer: compile
-				@dialyzer -Wno_return -c ebin
+eunit:
+	@echo "Running rebar3 eunit..."
+	@$(REBAR) eunit
 
-doc :
-				@./rebar doc skip_deps=true
+test: compile dialyzer eunit xref
+
+xref:
+	@echo "Running rebar3 xref..."
+	@$(REBAR) xref
+
+.PHONY: clean compile dialyzer eunit xref
