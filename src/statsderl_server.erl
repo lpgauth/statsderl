@@ -12,8 +12,7 @@
 }).
 
 %% public
-%% TODO: error valid proc_lib return?
--spec init(pid(), atom()) -> no_return() | {error, atom()}.
+-spec init(pid(), atom()) -> no_return().
 
 init(Parent, Name) ->
     Hostname = application:get_env(statsderl, ?ENV_HOSTNAME, ?DEFAULT_HOSTNAME),
@@ -32,10 +31,10 @@ init(Parent, Name) ->
                         header = Header
                     });
                 {error, Reason} ->
-                    {error, Reason}
+                    exit(Reason)
             end;
         {error, Reason} ->
-            {error, Reason}
+            exit(Reason)
     end.
 
 -spec start_link(atom()) -> {ok, pid()}.

@@ -6,7 +6,7 @@
 ]).
 
 %% public
--spec encode(op_code(), iodata(), iodata(), float()) -> iodata().
+-spec encode(op_code(), iodata(), number(), float()) -> iodata().
 
 encode(decrement, Key, Value, SampleRate) when SampleRate >= 1 ->
     [Key, ":-", format_value(Value), "|c"];
@@ -27,11 +27,9 @@ encode(timing, Key, Value, _SampleRate) ->
 
 %% private
 format_sample_rate(SampleRate) ->
-    % TODO: optimize me
-    ["|@", io_lib:format("~.3f", [SampleRate])].
+    ["|@", float_to_list(SampleRate, [{decimals, 3}])].
 
 format_value(Value) when is_integer(Value) ->
     integer_to_list(Value);
 format_value(Value) when is_float(Value) ->
-    % TODO: optimize me
-    io_lib:format("~.2f", [Value]).
+    float_to_list(Value, [{decimals, 2}]).

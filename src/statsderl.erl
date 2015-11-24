@@ -55,7 +55,7 @@ timing_fun(Key, Fun, SampleRate) ->
 -spec timing_now(iodata(), erlang:timestamp(), float()) -> ok.
 
 timing_now(Key, Timestamp, SampleRate) ->
-    timing(Key, stastderl_utils:now_diff_ms(Timestamp), SampleRate).
+    timing(Key, statsderl_utils:now_diff_ms(Timestamp), SampleRate).
 
 %% private
 cast(OpCode, Key, Value, SampleRate) ->
