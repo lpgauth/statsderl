@@ -58,27 +58,19 @@ timing_now(Key, Timestamp, SampleRate) ->
     timing(Key, stastderl_utils:now_diff_ms(Timestamp), SampleRate).
 
 %% private
-cast(Method, Key, Value, SampleRate) when is_integer(Value) ->
-    Value2 = integer_to_list(Value),
-    % TODO: DRY me
-    Packet = statsderl_protocol:encode(Method, Key, Value2, SampleRate),
-    statsderl_utils:random_server() ! {cast, Packet},
-    ok;
-cast(Method, Key, Value, SampleRate) when is_float(Value) ->
-    % TODO: optimize me
-    Value2 = io_lib:format("~.2f", [Value]),
-    Packet = statsderl_protocol:encode(Method, Key, Value2, SampleRate),
+cast(OpCode, Key, Value, SampleRate) ->
+    Packet = statsderl_protocol:encode(OpCode, Key, Value, SampleRate),
     statsderl_utils:random_server() ! {cast, Packet},
     ok.
 
-maybe_cast(Method, Key, Value, 1) ->
-    cast(Method, Key, Value, 1);
-maybe_cast(Method, Key, Value, 1.0) ->
-    cast(Method, Key, Value, 1);
-maybe_cast(Method, Key, Value, SampleRate) ->
+maybe_cast(OpCode, Key, Value, 1) ->
+    cast(OpCode, Key, Value, 1);
+maybe_cast(OpCode, Key, Value, 1.0) ->
+    cast(OpCode, Key, Value, 1);
+maybe_cast(OpCode, Key, Value, SampleRate) ->
     case statsderl_utils:random(100) + 1 =< SampleRate * 100 of
         true  ->
-            cast(Method, Key, Value, SampleRate);
+            cast(OpCode, Key, Value, SampleRate);
         false ->
             ok
     end.
