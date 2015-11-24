@@ -15,6 +15,17 @@
     timing_now/3
 ]).
 
+-type key() :: iolist().
+-type dec_value() :: 0|neg_integer()|float().
+-type inc_value() :: non_neg_integer()|float.
+-type sample_rate() :: float()|0|1.
+-export_type([
+    key/0,
+    dec_value/0,
+    inc_value/0,
+    sample_rate/0
+]).
+
 -behaviour(gen_server).
 -export([
     init/1,
@@ -37,18 +48,23 @@
 }).
 
 %% public
+-spec decrement(key(), dec_value(), sample_rate()) -> ok.
 decrement(Key, Value, SampleRate) ->
     maybe_send(decrement, Key, Value, SampleRate).
 
+-spec gauge(key(), inc_value()|dec_value(), sample_rate()) -> ok.
 gauge(Key, Value, SampleRate) ->
     maybe_send(gauge, Key, Value, SampleRate).
 
+-spec gauge_increment(key(), inc_value(), sample_rate()) -> ok.
 gauge_increment(Key, Value, SampleRate) ->
     maybe_send(gauge_increment, Key, Value, SampleRate).
 
+-spec gauge_decrement(key(), inc_value(), sample_rate()) -> ok.
 gauge_decrement(Key, Value, SampleRate) ->
     maybe_send(gauge_decrement, Key, Value, SampleRate).
 
+-spec increment(key(), inc_value(), sample_rate()) -> ok.
 increment(Key, Value, SampleRate) ->
     maybe_send(increment, Key, Value, SampleRate).
 
@@ -61,15 +77,18 @@ server_name(N) ->
 start_link(Name) ->
     gen_server:start_link({local, Name}, ?MODULE, [], []).
 
+-spec timing(key(), number(), sample_rate()) -> ok.
 timing(Key, Value, SampleRate) ->
     maybe_send(timing, Key, Value, SampleRate).
 
+-spec timing_fun(key(), fun((...) -> any()), sample_rate()) -> ok.
 timing_fun(Key, Fun, SampleRate) ->
     Timestamp = os:timestamp(),
     Result = Fun(),
     timing_now(Key, Timestamp, SampleRate),
     Result.
 
+-spec timing_now(key(), os:timestamp(), sample_rate()) -> ok.
 timing_now(Key, Timestamp, SampleRate) ->
     timing(Key, now_diff_ms(Timestamp), SampleRate).
 
