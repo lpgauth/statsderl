@@ -15,10 +15,10 @@
 now_diff_ms(Timestamp) ->
     timer:now_diff(os:timestamp(), Timestamp) div 1000.
 
--spec random(pos_integer()) -> non_neg_integer().
+-spec random(pos_integer()) -> pos_integer().
 
 random(N) ->
-    erlang:phash2({self(), os:timestamp()}, N).
+    erlang:phash2({self(), os:timestamp()}, N) + 1.
 
 -spec random_element([term()]) -> term().
 
@@ -26,12 +26,12 @@ random_element([X]) ->
     X;
 random_element([_|_] = List) ->
     T = list_to_tuple(List),
-    element(random(tuple_size(T)) + 1, T).
+    element(random(tuple_size(T)), T).
 
 -spec random_server() -> atom().
 
 random_server() ->
-    server_name(random(?POOL_SIZE) + 1).
+    server_name(random(?POOL_SIZE)).
 
 -spec server_name(pos_integer()) -> atom().
 

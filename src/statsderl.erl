@@ -59,8 +59,12 @@ timing_now(Key, Timestamp, SampleRate) ->
 
 %% private
 cast(OpCode, Key, Value, SampleRate) ->
+    ServerName = statsderl_utils:random_server(),
+    cast(OpCode, Key, Value, SampleRate, ServerName).
+
+cast(OpCode, Key, Value, SampleRate, ServerName) ->
     Packet = statsderl_protocol:encode(OpCode, Key, Value, SampleRate),
-    statsderl_utils:random_server() ! {cast, Packet},
+    ServerName ! {cast, Packet},
     ok.
 
 maybe_cast(OpCode, Key, Value, 1) ->
@@ -68,9 +72,12 @@ maybe_cast(OpCode, Key, Value, 1) ->
 maybe_cast(OpCode, Key, Value, 1.0) ->
     cast(OpCode, Key, Value, 1);
 maybe_cast(OpCode, Key, Value, SampleRate) ->
-    case statsderl_utils:random(100) + 1 =< SampleRate * 100 of
+    Rand = statsderl_utils:random(100),
+    case Rand =< SampleRate * 100 of
         true  ->
-            cast(OpCode, Key, Value, SampleRate);
+            N = Rand rem ?POOL_SIZE + 1,
+            ServerName = statsderl_utils:server_name(N),
+            cast(OpCode, Key, Value, SampleRate, ServerName);
         false ->
             ok
     end.
