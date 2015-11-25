@@ -72,8 +72,8 @@ maybe_cast(OpCode, Key, Value, 1) ->
 maybe_cast(OpCode, Key, Value, 1.0) ->
     cast(OpCode, Key, Value, 1);
 maybe_cast(OpCode, Key, Value, SampleRate) ->
-    Rand = statsderl_utils:random(100),
-    case Rand =< SampleRate * 100 of
+    Rand = statsderl_utils:random(1000000000),
+    case Rand =< SampleRate * 1000000000 of
         true  ->
             N = Rand rem ?POOL_SIZE + 1,
             ServerName = statsderl_utils:server_name(N),
