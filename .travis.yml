@@ -1,0 +1,14 @@
+cache:
+  directories:
+    - $HOME/.cache/rebar3
+    - $TRAVIS_BUILD_DIR/_build
+install: true
+language: erlang
+notifications:
+  email: false
+otp_release:
+  - 18.0
+  - 17.5
+  - R16B03-1
+script: "make test"
+sudo: false

@@ -3,6 +3,7 @@
 
 %% public
 -export([
+    counter/3,
     decrement/3,
     gauge/3,
     gauge_decrement/3,
@@ -14,32 +15,37 @@
 ]).
 
 %% public
--spec decrement(iodata(), integer(), float()) -> ok.
+-spec counter(iodata(), number(), float()) -> ok.
 
-decrement(Key, Value, SampleRate) ->
-    maybe_cast(decrement, Key, Value, SampleRate).
+counter(Key, Value, SampleRate) ->
+    maybe_cast(counter, Key, Value, SampleRate).
 
--spec gauge(iodata(), integer(), float()) -> ok.
+-spec decrement(iodata(), number(), float()) -> ok.
 
-gauge(Key, Value, SampleRate) ->
+decrement(Key, Value, SampleRate) when Value >= 0 ->
+    maybe_cast(counter, Key, -Value, SampleRate).
+
+-spec gauge(iodata(), number(), float()) -> ok.
+
+gauge(Key, Value, SampleRate) when Value >= 0 ->
     maybe_cast(gauge, Key, Value, SampleRate).
 
--spec gauge_decrement(iodata(), integer(), float()) -> ok.
+-spec gauge_decrement(iodata(), number(), float()) -> ok.
 
-gauge_decrement(Key, Value, SampleRate) ->
+gauge_decrement(Key, Value, SampleRate) when Value >= 0 ->
     maybe_cast(gauge_decrement, Key, Value, SampleRate).
 
--spec gauge_increment(iodata(), integer(), float()) -> ok.
+-spec gauge_increment(iodata(), number(), float()) -> ok.
 
-gauge_increment(Key, Value, SampleRate) ->
+gauge_increment(Key, Value, SampleRate) when Value >= 0 ->
     maybe_cast(gauge_increment, Key, Value, SampleRate).
 
--spec increment(iodata(), integer(), float()) -> ok.
+-spec increment(iodata(), number(), float()) -> ok.
 
-increment(Key, Value, SampleRate) ->
-    maybe_cast(increment, Key, Value, SampleRate).
+increment(Key, Value, SampleRate) when Value >= 0 ->
+    maybe_cast(counter, Key, Value, SampleRate).
 
--spec timing(iodata(), integer(), float()) -> ok.
+-spec timing(iodata(), number(), float()) -> ok.
 
 timing(Key, Value, SampleRate) ->
     maybe_cast(timing, Key, Value, SampleRate).
@@ -47,7 +53,7 @@ timing(Key, Value, SampleRate) ->
 -spec timing_fun(iodata(), fun(), float()) -> ok.
 
 timing_fun(Key, Fun, SampleRate) ->
-    Timestamp = os:timestamp(),
+    Timestamp = statsderl_utils:timestamp(),
     Result = Fun(),
     timing_now(Key, Timestamp, SampleRate),
     Result.
@@ -55,7 +61,9 @@ timing_fun(Key, Fun, SampleRate) ->
 -spec timing_now(iodata(), erlang:timestamp(), float()) -> ok.
 
 timing_now(Key, Timestamp, SampleRate) ->
-    timing(Key, statsderl_utils:now_diff_ms(Timestamp), SampleRate).
+    Timestamp2 = statsderl_utils:timestamp(),
+    Value = timer:now_diff(Timestamp2, Timestamp) div 1000,
+    timing(Key, Value, SampleRate).
 
 %% private
 cast(OpCode, Key, Value, SampleRate) ->
@@ -72,8 +80,8 @@ maybe_cast(OpCode, Key, Value, 1) ->
 maybe_cast(OpCode, Key, Value, 1.0) ->
     cast(OpCode, Key, Value, 1);
 maybe_cast(OpCode, Key, Value, SampleRate) ->
-    Rand = statsderl_utils:random(1000000000),
-    case Rand =< SampleRate * 1000000000 of
+    Rand = statsderl_utils:random(?MAX_UNSIGNED_INT_32),
+    case Rand =< SampleRate * ?MAX_UNSIGNED_INT_32 of
         true  ->
             N = Rand rem ?POOL_SIZE + 1,
             ServerName = statsderl_utils:server_name(N),
