@@ -13,7 +13,7 @@
 ]).
 
 %% public
--spec start() -> {ok, [atom()]}.
+-spec start() -> ok | {error, atom()}.
 
 start() ->
     application:start(?APP).
