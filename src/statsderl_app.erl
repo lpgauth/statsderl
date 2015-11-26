@@ -16,7 +16,7 @@
 -spec start() -> {ok, [atom()]}.
 
 start() ->
-    application:ensure_all_started(?APP).
+    application:start(?APP).
 
 -spec stop() -> ok | {error, {not_started, ?APP}}.
 

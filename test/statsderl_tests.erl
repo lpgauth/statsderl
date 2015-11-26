@@ -31,7 +31,7 @@ counter_subtest(Socket) ->
     assert_packet(Socket, <<"test:1.12|c">>).
 
 decrement_subtest(Socket) ->
-    statsderl:decrement("test", 1, 1),
+    statsderl:decrement("test", 1, 1.0),
     assert_packet(Socket, <<"test:-1|c">>).
 
 gauge_subtest(Socket) ->
