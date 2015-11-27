@@ -35,9 +35,13 @@ High Performance StatsD Erlang client
     <td>8125</td>
     <td>server port</td>
   </tr>
-
-
 </table>
+
+#### base_key
+
+ * `hostname` -- use the hostname returned by `inet:gethostname/0`.
+ * `name` -- use the long node name (passed to `erl -name`; e.g. "nonode@nohost").
+ * `sname` -- use the short node name (passed to `erl -sname`; e.g. the "nonode" in "nonode@nohost").
 
 ## API
 <a href="https://github.com/lpgauth/statsderl/blob/dev/doc/statsderl.md#index" class="module">Function Index</a>
