@@ -37,11 +37,34 @@ High Performance StatsD Erlang client
   </tr>
 </table>
 
-#### base_key
+#### base_key options
 
- * `hostname` -- use the hostname returned by `inet:gethostname/0`
- * `name` -- use the long node name (e.g. "nonode@nohost")
- * `sname` -- use the short node name (e.g. the "nonode" in "nonode@nohost")
+<table width="100%">
+  <theader>
+    <th>Option</th>
+    <th>Source</th>
+    <th>Description</th>
+    <th>Example</th>
+  </theader>
+  <tr>
+    <td>hostname</td>
+    <td>inet:gethostname/0</td>
+    <td>use the hostname</td>
+    <td>"h033"</td>
+  </tr>
+  <tr>
+    <td>name</td>
+    <td>erl -name</td>
+    <td>use the long node name</td>
+    <td>"nonode@nohost"</td>
+  </tr>
+  <tr>
+    <td>sname</td>
+    <td>erl -sname</td>
+    <td>use the short node name</td>
+    <td>"nonode"</td>
+  </tr>
+</table>
 
 ## API
 <a href="https://github.com/lpgauth/statsderl/blob/master/doc/statsderl.md#index" class="module">Function Index</a>
