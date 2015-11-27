@@ -2,7 +2,7 @@
 
 High Performance StatsD Erlang client
 
-[![Build Status](https://travis-ci.org/lpgauth/statsderl.svg?branch=dev)](https://travis-ci.org/lpgauth/statsderl)
+[![Build Status](https://travis-ci.org/lpgauth/statsderl.svg?branch=master)](https://travis-ci.org/lpgauth/statsderl)
 
 ### Requirements
 
@@ -44,7 +44,7 @@ High Performance StatsD Erlang client
  * `sname` -- use the short node name (passed to `erl -sname`; e.g. the "nonode" in "nonode@nohost").
 
 ## API
-<a href="https://github.com/lpgauth/statsderl/blob/dev/doc/statsderl.md#index" class="module">Function Index</a>
+<a href="https://github.com/lpgauth/statsderl/blob/master/doc/statsderl.md#index" class="module">Function Index</a>
 
 ## Examples
 
