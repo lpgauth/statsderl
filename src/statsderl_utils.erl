@@ -2,6 +2,7 @@
 -include("statsderl.hrl").
 
 -export([
+    inet_getaddrs/1,
     random/1,
     random_element/1,
     random_server/0,
@@ -10,6 +11,12 @@
 ]).
 
 %% public
+-spec inet_getaddrs(inet:ip_address() | inet:hostname()) ->
+    {ok, [inet:ip_address()]} | {error, atom()}.
+
+inet_getaddrs(Hostname) ->
+    inet:getaddrs(Hostname, inet).
+
 -spec random(pos_integer()) -> pos_integer().
 
 random(N) ->
@@ -21,7 +28,8 @@ random_element([Element]) ->
     Element;
 random_element([_|_] = List) ->
     T = list_to_tuple(List),
-    element(random(tuple_size(T)), T).
+    Index = statsderl_utils:random(tuple_size(T)),
+    element(Index, T).
 
 -spec random_server() -> atom().
 

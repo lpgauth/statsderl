@@ -61,8 +61,10 @@ base_key(BaseKey) ->
 
 getaddrs({_, _, _, _} = Address) ->
     {ok, Address};
+getaddrs(Hostname) when is_binary(Hostname) ->
+    getaddrs(binary_to_list(Hostname));
 getaddrs(Hostname) ->
-    case inet:getaddrs(Hostname, inet) of
+    case statsderl_utils:inet_getaddrs(Hostname) of
         {ok, Addrs} ->
             {ok, statsderl_utils:random_element(Addrs)};
         {error, Reason} ->

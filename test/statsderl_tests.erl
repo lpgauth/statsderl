@@ -1,13 +1,38 @@
-%% TODO
-% timing_fun/3,
-% timing_now/3
-% sampling rate
-
 -module(statsderl_tests).
 -include_lib("statsderl/include/statsderl.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 -spec test() -> ok.
+
+statsderl_base_key_test() ->
+    assert_base_key("base_key", <<"base_key.">>),
+    assert_base_key(<<"base_key">>, <<"base_key.">>),
+
+    {ok, Hostname} = inet:gethostname(),
+    assert_base_key(hostname, <<(list_to_binary(Hostname))/binary, ".">>),
+
+    Name = atom_to_list(node()),
+    Name2 = re:replace(Name, "@", ".", [global, {return, binary}]),
+    assert_base_key(name, <<Name2/binary, ".">>),
+
+    Sname = atom_to_list(node()),
+    Sname2 = string:sub_word(Sname, 1, $@),
+    assert_base_key(sname, <<(list_to_binary(Sname2))/binary, ".">>),
+
+    assert_base_key(undefined, <<>>).
+
+statsderl_hostname_test() ->
+    meck:new(statsderl_utils, [passthrough, no_history]),
+    meck:expect(statsderl_utils, inet_getaddrs, fun (_) ->
+        {ok, [{10, 0, 0, 0}, {127, 0, 0, 1}]}
+    end),
+    meck:expect(statsderl_utils, random, fun (_) -> 2 end),
+    Socket = setup([{?ENV_HOSTNAME, <<"adgear.com">>}]),
+    statsderl:counter("test", 1, 1),
+    {ok, {_Address, _Port, Packet}} = gen_udp:recv(Socket, 0),
+    ?assertEqual(<<"test:1|c">>, Packet),
+    meck:unload(statsderl_utils),
+    cleanup(Socket).
 
 statsderl_test_() ->
     {setup,
@@ -26,6 +51,7 @@ statsderl_test_() ->
         ]}
     }.
 
+%% subtests
 counter_subtest(Socket) ->
     statsderl:counter("test", 1.123, 1),
     assert_packet(Socket, <<"test:1.12|c">>).
@@ -55,6 +81,8 @@ sampling_rate_subtest(Socket) ->
     meck:expect(statsderl_utils, random, fun (?MAX_UNSIGNED_INT_32) -> 0 end),
     statsderl:counter("test", 1, 0.1234),
     assert_packet(Socket, <<"test:1|c|@0.123">>),
+    meck:expect(statsderl_utils, random, fun (?MAX_UNSIGNED_INT_32) -> ?MAX_UNSIGNED_INT_32 end),
+    statsderl:counter("test", 1, 0.1234),
     meck:unload(statsderl_utils).
 
 timing_fun_subtest(Socket) ->
@@ -69,7 +97,14 @@ timing_subtest(Socket) ->
     statsderl:timing("test", 1, 1),
     assert_packet(Socket, <<"test:1|ms">>).
 
-%% private
+%% helpers
+assert_base_key(BaseKey, Expected) ->
+    Socket = setup([{?ENV_BASEKEY, BaseKey}]),
+    statsderl:counter("test", 1, 1),
+    {ok, {_Address, _Port, Packet}} = gen_udp:recv(Socket, 0),
+    ?assertEqual(<<Expected/binary, "test:1|c">>, Packet),
+    cleanup(Socket).
+
 assert_packet(Socket, Expected) ->
     {ok, {_Address, _Port, Packet}} = gen_udp:recv(Socket, 0),
     ?assertEqual(Expected, Packet).
@@ -79,7 +114,13 @@ cleanup(Socket) ->
     statsderl_app:stop().
 
 setup() ->
+    setup([]).
+
+setup(EnvVars) ->
     error_logger:tty(false),
+    application:load(?APP),
+    [application:unset_env(?APP, K) || K <- ?ENV_VARS],
+    [application:set_env(?APP, K, V) || {K, V} <- EnvVars],
     statsderl_app:start(),
     {ok, Socket} = gen_udp:open(?DEFAULT_PORT, [binary, {active, false}]),
     Socket.

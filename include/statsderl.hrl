@@ -6,6 +6,7 @@
 -define(ENV_BASEKEY, base_key).
 -define(ENV_HOSTNAME, hostname).
 -define(ENV_PORT, port).
+-define(ENV_VARS, [?ENV_BASEKEY, ?ENV_HOSTNAME, ?ENV_PORT]).
 -define(MAX_UNSIGNED_INT_32, 4294967296).
 -define(POOL_SIZE, 4).
 

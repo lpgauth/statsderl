@@ -9,12 +9,21 @@
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#random-1">random/1</a></td><td></td></tr><tr><td valign="top"><a href="#random_element-1">random_element/1</a></td><td></td></tr><tr><td valign="top"><a href="#random_server-0">random_server/0</a></td><td></td></tr><tr><td valign="top"><a href="#server_name-1">server_name/1</a></td><td></td></tr><tr><td valign="top"><a href="#timestamp-0">timestamp/0</a></td><td></td></tr></table>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#inet_getaddrs-1">inet_getaddrs/1</a></td><td></td></tr><tr><td valign="top"><a href="#random-1">random/1</a></td><td></td></tr><tr><td valign="top"><a href="#random_element-1">random_element/1</a></td><td></td></tr><tr><td valign="top"><a href="#random_server-0">random_server/0</a></td><td></td></tr><tr><td valign="top"><a href="#server_name-1">server_name/1</a></td><td></td></tr><tr><td valign="top"><a href="#timestamp-0">timestamp/0</a></td><td></td></tr></table>
 
 
 <a name="functions"></a>
 
 ## Function Details ##
+
+<a name="inet_getaddrs-1"></a>
+
+### inet_getaddrs/1 ###
+
+<pre><code>
+inet_getaddrs(Hostname::<a href="inet.md#type-ip_address">inet:ip_address()</a> | <a href="inet.md#type-hostname">inet:hostname()</a>) -&gt; {ok, [<a href="inet.md#type-ip_address">inet:ip_address()</a>]} | {error, atom()}
+</code></pre>
+<br />
 
 <a name="random-1"></a>
 
