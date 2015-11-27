@@ -1,8 +1,6 @@
 # statsderl
 
-__Author:__ Louis-Philippe Gauthier.
-
-Non-blocking Erlang Memcached client
+High Performance StatsD Erlang client
 
 [![Build Status](https://travis-ci.org/lpgauth/statsderl.svg?branch=dev)](https://travis-ci.org/lpgauth/statsderl)
 
