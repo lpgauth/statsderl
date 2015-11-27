@@ -42,7 +42,7 @@ Non-blocking Erlang Memcached client
 </table>
 
 ## API
-<a href="http://github.com/lpgauth/statsderl/blob/master/dev/statsderl.md#index" class="module">Function Index</a>
+<a href="https://github.com/lpgauth/statsderl/blob/dev/doc/statsderl.md#index" class="module">Function Index</a>
 
 ## Examples
 
