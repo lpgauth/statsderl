@@ -73,7 +73,7 @@ High Performance StatsD Erlang client
 
 ```erlang
 1> statsderl_app:start().
-ok
+ok.
 
 2> statsderl:counter(["test", $., "counter"], 1, 0.23).
 ok.
@@ -94,18 +94,19 @@ ok.
 ok.
 
 8> statsderl:timing("test.timing", 5, 0.5).
-ok
+ok.
 
 9> statsderl:timing_fun(<<"test.timing_fun">>, fun() -> timer:sleep(100) end, 0.5).
+ok.
 
 10> Timestamp = os:timestamp().
 {1448,591778,258983}
 
 11> statsderl:timing_now("test.timing_now", Timestamp, 0.15).
-ok
+ok.
 
 12> statsderl_app:stop().
-ok
+ok.
 ```
 
 ## Tests
