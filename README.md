@@ -26,7 +26,7 @@ High Performance StatsD Erlang client
   <tr>
     <td>hostname</td>
     <td>binary() | inet:ip_address() | inet:hostname()</td>
-    <td>{127, 0, 0, 1}</td>
+    <td>{127,0,0,1}</td>
     <td>server hostname</td>
   </tr>
   <tr>
