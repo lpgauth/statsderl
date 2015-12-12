@@ -15,9 +15,9 @@
 -spec init(pid(), atom()) -> no_return().
 
 init(Parent, Name) ->
-    Hostname = application:get_env(statsderl, ?ENV_HOSTNAME, ?DEFAULT_HOSTNAME),
-    Port = application:get_env(statsderl, ?ENV_PORT, ?DEFAULT_PORT),
-    BaseKey = application:get_env(statsderl, ?ENV_BASEKEY, ?DEFAULT_BASEKEY),
+    BaseKey = ?ENV(?ENV_BASEKEY, ?DEFAULT_BASEKEY),
+    Hostname = ?ENV(?ENV_HOSTNAME, ?DEFAULT_HOSTNAME),
+    Port = ?ENV(?ENV_PORT, ?DEFAULT_PORT),
 
     case udp_header(Hostname, Port, BaseKey) of
         {ok, Header} ->
@@ -68,7 +68,7 @@ getaddrs(Hostname) ->
         {ok, Addrs} ->
             {ok, statsderl_utils:random_element(Addrs)};
         {error, Reason} ->
-            error_logger:error_msg("[statsderl] getaddrs error: ~p~n", [Reason]),
+            statsderl_utils:error_msg("[statsderl] getaddrs error: ~p~n", [Reason]),
             {error, Reason}
     end.
 
@@ -81,7 +81,7 @@ handle_msg({cast, Packet}, #state {
         erlang:port_command(Socket, [Header, Packet])
     catch
         Error:Reason ->
-            error_logger:error_msg("[statsderl] port_command ~p: ~p~n", [Error, Reason])
+            statsderl_utils:error_msg("[statsderl] port_command ~p: ~p~n", [Error, Reason])
     end,
     {ok, State};
 handle_msg({inet_reply, _Socket, ok}, State) ->

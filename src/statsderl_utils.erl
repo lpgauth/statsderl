@@ -2,6 +2,7 @@
 -include("statsderl.hrl").
 
 -export([
+    error_msg/2,
     inet_getaddrs/1,
     random/1,
     random_element/1,
@@ -11,6 +12,11 @@
 ]).
 
 %% public
+-spec error_msg(string(), [term()]) -> ok.
+
+error_msg(Format, Data) ->
+    error_logger:error_msg(Format, Data).
+
 -spec inet_getaddrs(inet:ip_address() | inet:hostname()) ->
     {ok, [inet:ip_address()]} | {error, atom()}.
 

@@ -29,4 +29,4 @@ child_specs(0) ->
     [];
 child_specs(N) ->
     Name = statsderl_utils:server_name(N),
-    [?CHILD(Name, statsderl_server) | child_specs(N - 1)].
+    [?CHILD(Name, ?SERVER) | child_specs(N - 1)].
