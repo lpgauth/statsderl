@@ -26,7 +26,7 @@ High Performance StatsD Erlang client
   <tr>
     <td>hostname</td>
     <td>binary() | inet:ip_address() | inet:hostname()</td>
-    <td>{127, 0, 0, 1}</td>
+    <td>{127,0,0,1}</td>
     <td>server hostname</td>
   </tr>
   <tr>
@@ -37,11 +37,34 @@ High Performance StatsD Erlang client
   </tr>
 </table>
 
-#### base_key
+#### base_key options
 
- * `hostname` -- use the hostname returned by `inet:gethostname/0`.
- * `name` -- use the long node name (passed to `erl -name`; e.g. "nonode@nohost").
- * `sname` -- use the short node name (passed to `erl -sname`; e.g. the "nonode" in "nonode@nohost").
+<table width="100%">
+  <theader>
+    <th>Option</th>
+    <th>Source</th>
+    <th>Description</th>
+    <th>Example</th>
+  </theader>
+  <tr>
+    <td>hostname</td>
+    <td>inet:gethostname/0</td>
+    <td>use the hostname</td>
+    <td>"h033"</td>
+  </tr>
+  <tr>
+    <td>name</td>
+    <td>erl -name</td>
+    <td>use the long node name</td>
+    <td>"nonode@nohost"</td>
+  </tr>
+  <tr>
+    <td>sname</td>
+    <td>erl -sname</td>
+    <td>use the short node name</td>
+    <td>"nonode"</td>
+  </tr>
+</table>
 
 ## API
 <a href="https://github.com/lpgauth/statsderl/blob/master/doc/statsderl.md#index" class="module">Function Index</a>
@@ -50,7 +73,7 @@ High Performance StatsD Erlang client
 
 ```erlang
 1> statsderl_app:start().
-ok
+ok.
 
 2> statsderl:counter(["test", $., "counter"], 1, 0.23).
 ok.
@@ -71,18 +94,19 @@ ok.
 ok.
 
 8> statsderl:timing("test.timing", 5, 0.5).
-ok
+ok.
 
 9> statsderl:timing_fun(<<"test.timing_fun">>, fun() -> timer:sleep(100) end, 0.5).
+ok.
 
 10> Timestamp = os:timestamp().
 {1448,591778,258983}
 
 11> statsderl:timing_now("test.timing_now", Timestamp, 0.15).
-ok
+ok.
 
 12> statsderl_app:stop().
-ok
+ok.
 ```
 
 ## Tests
