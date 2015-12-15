@@ -72,8 +72,7 @@ cast(OpCode, Key, Value, SampleRate) ->
 
 cast(OpCode, Key, Value, SampleRate, ServerName) ->
     Packet = statsderl_protocol:encode(OpCode, Key, Value, SampleRate),
-    ServerName ! {cast, Packet},
-    ok.
+    send(whereis(ServerName), {cast, Packet}).
 
 maybe_cast(OpCode, Key, Value, 1) ->
     cast(OpCode, Key, Value, 1);
@@ -87,5 +86,16 @@ maybe_cast(OpCode, Key, Value, SampleRate) ->
             ServerName = statsderl_utils:server_name(N),
             cast(OpCode, Key, Value, SampleRate, ServerName);
         false ->
+            ok
+    end.
+
+send(undefined, _Msg) ->
+    ok;
+send(Pid, Msg) ->
+    try
+        Pid ! Msg,
+        ok
+    catch
+        error:badarg ->
             ok
     end.
