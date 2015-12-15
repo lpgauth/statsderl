@@ -12,11 +12,41 @@
 
 
 
+### <a name="type-key">key()</a> ###
+
+
+<pre><code>
+key() = iodata()
+</code></pre>
+
+
+
+
 ### <a name="type-op_code">op_code()</a> ###
 
 
 <pre><code>
 op_code() = decrement | gauge | gauge_decrement | gauge_increment | increment | timing
+</code></pre>
+
+
+
+
+### <a name="type-sample_rate">sample_rate()</a> ###
+
+
+<pre><code>
+sample_rate() = number()
+</code></pre>
+
+
+
+
+### <a name="type-value">value()</a> ###
+
+
+<pre><code>
+value() = number()
 </code></pre>
 
 <a name="index"></a>
@@ -36,7 +66,7 @@ op_code() = decrement | gauge | gauge_decrement | gauge_increment | increment | 
 ### encode/4 ###
 
 <pre><code>
-encode(X1::<a href="#type-op_code">op_code()</a>, Key::iodata(), Value::number(), SampleRate::float()) -&gt; iodata()
+encode(X1::<a href="#type-op_code">op_code()</a>, Key::<a href="#type-key">key()</a>, Value::<a href="#type-value">value()</a>, SampleRate::<a href="#type-sample_rate">sample_rate()</a>) -&gt; iodata()
 </code></pre>
 <br />
 

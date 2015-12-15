@@ -15,42 +15,42 @@
 ]).
 
 %% public
--spec counter(iodata(), number(), float()) -> ok.
+-spec counter(key(), value(), sample_rate()) -> ok.
 
 counter(Key, Value, SampleRate) ->
     maybe_cast(counter, Key, Value, SampleRate).
 
--spec decrement(iodata(), number(), float()) -> ok.
+-spec decrement(key(), value(), sample_rate()) -> ok.
 
 decrement(Key, Value, SampleRate) when Value >= 0 ->
     maybe_cast(counter, Key, -Value, SampleRate).
 
--spec gauge(iodata(), number(), float()) -> ok.
+-spec gauge(key(), value(), sample_rate()) -> ok.
 
 gauge(Key, Value, SampleRate) when Value >= 0 ->
     maybe_cast(gauge, Key, Value, SampleRate).
 
--spec gauge_decrement(iodata(), number(), float()) -> ok.
+-spec gauge_decrement(key(), value(), sample_rate()) -> ok.
 
 gauge_decrement(Key, Value, SampleRate) when Value >= 0 ->
     maybe_cast(gauge_decrement, Key, Value, SampleRate).
 
--spec gauge_increment(iodata(), number(), float()) -> ok.
+-spec gauge_increment(key(), value(), sample_rate()) -> ok.
 
 gauge_increment(Key, Value, SampleRate) when Value >= 0 ->
     maybe_cast(gauge_increment, Key, Value, SampleRate).
 
--spec increment(iodata(), number(), float()) -> ok.
+-spec increment(key(), value(), sample_rate()) -> ok.
 
 increment(Key, Value, SampleRate) when Value >= 0 ->
     maybe_cast(counter, Key, Value, SampleRate).
 
--spec timing(iodata(), number(), float()) -> ok.
+-spec timing(key(), value(), sample_rate()) -> ok.
 
 timing(Key, Value, SampleRate) ->
     maybe_cast(timing, Key, Value, SampleRate).
 
--spec timing_fun(iodata(), fun(), float()) -> ok.
+-spec timing_fun(key(), fun(), sample_rate()) -> ok.
 
 timing_fun(Key, Fun, SampleRate) ->
     Timestamp = statsderl_utils:timestamp(),
@@ -58,7 +58,7 @@ timing_fun(Key, Fun, SampleRate) ->
     timing_now(Key, Timestamp, SampleRate),
     Result.
 
--spec timing_now(iodata(), erlang:timestamp(), float()) -> ok.
+-spec timing_now(key(), erlang:timestamp(), sample_rate()) -> ok.
 
 timing_now(Key, Timestamp, SampleRate) ->
     Timestamp2 = statsderl_utils:timestamp(),

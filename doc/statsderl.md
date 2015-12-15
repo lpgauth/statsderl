@@ -1,8 +1,43 @@
 
 
 # Module statsderl #
+* [Data Types](#types)
 * [Function Index](#index)
 * [Function Details](#functions)
+
+<a name="types"></a>
+
+## Data Types ##
+
+
+
+
+### <a name="type-key">key()</a> ###
+
+
+<pre><code>
+key() = iodata()
+</code></pre>
+
+
+
+
+### <a name="type-sample_rate">sample_rate()</a> ###
+
+
+<pre><code>
+sample_rate() = number()
+</code></pre>
+
+
+
+
+### <a name="type-value">value()</a> ###
+
+
+<pre><code>
+value() = number()
+</code></pre>
 
 <a name="index"></a>
 
@@ -21,7 +56,7 @@
 ### counter/3 ###
 
 <pre><code>
-counter(Key::iodata(), Value::number(), SampleRate::float()) -&gt; ok
+counter(Key::<a href="#type-key">key()</a>, Value::<a href="#type-value">value()</a>, SampleRate::<a href="#type-sample_rate">sample_rate()</a>) -&gt; ok
 </code></pre>
 <br />
 
@@ -30,7 +65,7 @@ counter(Key::iodata(), Value::number(), SampleRate::float()) -&gt; ok
 ### decrement/3 ###
 
 <pre><code>
-decrement(Key::iodata(), Value::number(), SampleRate::float()) -&gt; ok
+decrement(Key::<a href="#type-key">key()</a>, Value::<a href="#type-value">value()</a>, SampleRate::<a href="#type-sample_rate">sample_rate()</a>) -&gt; ok
 </code></pre>
 <br />
 
@@ -39,7 +74,7 @@ decrement(Key::iodata(), Value::number(), SampleRate::float()) -&gt; ok
 ### gauge/3 ###
 
 <pre><code>
-gauge(Key::iodata(), Value::number(), SampleRate::float()) -&gt; ok
+gauge(Key::<a href="#type-key">key()</a>, Value::<a href="#type-value">value()</a>, SampleRate::<a href="#type-sample_rate">sample_rate()</a>) -&gt; ok
 </code></pre>
 <br />
 
@@ -48,7 +83,7 @@ gauge(Key::iodata(), Value::number(), SampleRate::float()) -&gt; ok
 ### gauge_decrement/3 ###
 
 <pre><code>
-gauge_decrement(Key::iodata(), Value::number(), SampleRate::float()) -&gt; ok
+gauge_decrement(Key::<a href="#type-key">key()</a>, Value::<a href="#type-value">value()</a>, SampleRate::<a href="#type-sample_rate">sample_rate()</a>) -&gt; ok
 </code></pre>
 <br />
 
@@ -57,7 +92,7 @@ gauge_decrement(Key::iodata(), Value::number(), SampleRate::float()) -&gt; ok
 ### gauge_increment/3 ###
 
 <pre><code>
-gauge_increment(Key::iodata(), Value::number(), SampleRate::float()) -&gt; ok
+gauge_increment(Key::<a href="#type-key">key()</a>, Value::<a href="#type-value">value()</a>, SampleRate::<a href="#type-sample_rate">sample_rate()</a>) -&gt; ok
 </code></pre>
 <br />
 
@@ -66,7 +101,7 @@ gauge_increment(Key::iodata(), Value::number(), SampleRate::float()) -&gt; ok
 ### increment/3 ###
 
 <pre><code>
-increment(Key::iodata(), Value::number(), SampleRate::float()) -&gt; ok
+increment(Key::<a href="#type-key">key()</a>, Value::<a href="#type-value">value()</a>, SampleRate::<a href="#type-sample_rate">sample_rate()</a>) -&gt; ok
 </code></pre>
 <br />
 
@@ -75,7 +110,7 @@ increment(Key::iodata(), Value::number(), SampleRate::float()) -&gt; ok
 ### timing/3 ###
 
 <pre><code>
-timing(Key::iodata(), Value::number(), SampleRate::float()) -&gt; ok
+timing(Key::<a href="#type-key">key()</a>, Value::<a href="#type-value">value()</a>, SampleRate::<a href="#type-sample_rate">sample_rate()</a>) -&gt; ok
 </code></pre>
 <br />
 
@@ -84,7 +119,7 @@ timing(Key::iodata(), Value::number(), SampleRate::float()) -&gt; ok
 ### timing_fun/3 ###
 
 <pre><code>
-timing_fun(Key::iodata(), Fun::function(), SampleRate::float()) -&gt; ok
+timing_fun(Key::<a href="#type-key">key()</a>, Fun::function(), SampleRate::<a href="#type-sample_rate">sample_rate()</a>) -&gt; ok
 </code></pre>
 <br />
 
@@ -93,7 +128,7 @@ timing_fun(Key::iodata(), Fun::function(), SampleRate::float()) -&gt; ok
 ### timing_now/3 ###
 
 <pre><code>
-timing_now(Key::iodata(), Timestamp::<a href="erlang.md#type-timestamp">erlang:timestamp()</a>, SampleRate::float()) -&gt; ok
+timing_now(Key::<a href="#type-key">key()</a>, Timestamp::<a href="erlang.md#type-timestamp">erlang:timestamp()</a>, SampleRate::<a href="#type-sample_rate">sample_rate()</a>) -&gt; ok
 </code></pre>
 <br />
 

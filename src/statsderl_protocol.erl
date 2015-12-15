@@ -6,7 +6,7 @@
 ]).
 
 %% public
--spec encode(op_code(), iodata(), number(), float()) -> iodata().
+-spec encode(op_code(), key(), value(), sample_rate()) -> iodata().
 
 encode(counter, Key, Value, SampleRate) ->
     [Key, ":", format_value(Value), "|c", format_sample_rate(SampleRate)];

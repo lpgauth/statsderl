@@ -14,5 +14,8 @@
 -define(SERVER, statsderl_server).
 
 %% types
+-type key() :: iodata().
 -type op_code() :: decrement | gauge | gauge_decrement |
     gauge_increment | increment | timing.
+-type sample_rate() :: number().
+-type value() :: number().
