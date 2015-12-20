@@ -6,27 +6,13 @@
 
 statsderl_base_key_test() ->
     assert_base_key("base_key", <<"base_key.">>),
-    assert_base_key(<<"base_key">>, <<"base_key.">>),
-
-    {ok, Hostname} = inet:gethostname(),
-    assert_base_key(hostname, <<(list_to_binary(Hostname))/binary, ".">>),
-
-    Name = atom_to_list(node()),
-    Name2 = re:replace(Name, "@", ".", [global, {return, binary}]),
-    assert_base_key(name, <<Name2/binary, ".">>),
-
-    Sname = atom_to_list(node()),
-    Sname2 = string:sub_word(Sname, 1, $@),
-    assert_base_key(sname, <<(list_to_binary(Sname2))/binary, ".">>),
-
-    assert_base_key(undefined, <<>>).
+    assert_base_key(<<"base_key">>, <<"base_key.">>).
 
 statsderl_hostname_test() ->
     meck:new(statsderl_utils, [passthrough, no_history]),
-    meck:expect(statsderl_utils, inet_getaddrs, fun (_) ->
-        {ok, [{10, 0, 0, 0}, {127, 0, 0, 1}]}
+    meck:expect(statsderl_utils, getaddrs, fun (_) ->
+        {ok, {127, 0, 0, 1}}
     end),
-    meck:expect(statsderl_utils, random, fun (_) -> 2 end),
     Socket = setup([{?ENV_HOSTNAME, <<"adgear.com">>}]),
     statsderl:counter("test", 1, 1),
     {ok, {_Address, _Port, Packet}} = gen_udp:recv(Socket, 0),
