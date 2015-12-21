@@ -14,8 +14,11 @@
 -define(SERVER, statsderl_server).
 
 %% types
+-type base_key() :: base_key_part() | [base_key_part()].
+-type base_key_part() :: hostname | name | sname | undefined | iodata().
 -type key() :: iodata().
--type op_code() :: decrement | gauge | gauge_decrement |
-    gauge_increment | increment | timing.
+-type op_code() :: decrement | gauge | gauge_decrement | gauge_increment |
+    increment | timing.
 -type sample_rate() :: number().
 -type value() :: number().
+

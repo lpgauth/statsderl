@@ -7,7 +7,7 @@
 ]).
 
 -record(state, {
-    header :: iolist(),
+    header :: binary(),
     socket :: inet:socket()
 }).
 
@@ -43,35 +43,6 @@ start_link(Name) ->
     proc_lib:start_link(?MODULE, init, [self(), Name]).
 
 %% private
-base_key(hostname) ->
-    {ok, Hostname} = inet:gethostname(),
-    [Hostname, $.];
-base_key(name) ->
-    Name = atom_to_list(node()),
-    Value = re:replace(Name, "@", ".", [global, {return, list}]),
-    [Value, $.];
-base_key(sname) ->
-    Name = atom_to_list(node()),
-    SName = string:sub_word(Name, 1, $@),
-    [SName, $.];
-base_key(undefined) ->
-    "";
-base_key(BaseKey) ->
-    [BaseKey, $.].
-
-getaddrs({_, _, _, _} = Address) ->
-    {ok, Address};
-getaddrs(Hostname) when is_binary(Hostname) ->
-    getaddrs(binary_to_list(Hostname));
-getaddrs(Hostname) ->
-    case statsderl_utils:inet_getaddrs(Hostname) of
-        {ok, Addrs} ->
-            {ok, statsderl_utils:random_element(Addrs)};
-        {error, Reason} ->
-            statsderl_utils:error_msg("[statsderl] getaddrs error: ~p~n", [Reason]),
-            {error, Reason}
-    end.
-
 handle_msg({cast, Packet}, #state {
         header = Header,
         socket = Socket
@@ -81,7 +52,7 @@ handle_msg({cast, Packet}, #state {
         erlang:port_command(Socket, [Header, Packet])
     catch
         Error:Reason ->
-            statsderl_utils:error_msg("[statsderl] port_command ~p: ~p~n", [Error, Reason])
+            statsderl_utils:error_msg("port_command ~p: ~p~n", [Error, Reason])
     end,
     {ok, State};
 handle_msg({inet_reply, _Socket, ok}, State) ->
@@ -94,13 +65,13 @@ loop(State) ->
     end.
 
 udp_header(Hostname, Port, BaseKey) ->
-    case getaddrs(Hostname) of
+    case statsderl_utils:getaddrs(Hostname) of
         {ok, {A, B, C, D}} ->
-            {ok, [
+            {ok, iolist_to_binary([
                 [((Port) bsr 8) band 16#ff, (Port) band 16#ff],
                 [A band 16#ff, B band 16#ff, C band 16#ff, D band 16#ff],
-                base_key(BaseKey)
-            ]};
+                statsderl_utils:base_key(BaseKey)
+            ])};
         {error, Reason} ->
             {error, Reason}
     end.

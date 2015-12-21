@@ -19,19 +19,19 @@ High Performance StatsD Erlang client
   </theader>
   <tr>
     <td>base_key</td>
-    <td>hostname | name | sname | undefined | io:data()</td>
+    <td>base_key()</td>
     <td>undefined</td>
     <td>key prefix</td>
   </tr>
   <tr>
     <td>hostname</td>
-    <td>binary() | inet:ip_address() | inet:hostname()</td>
+    <td>inet:ip_address() | inet:hostname() | binary()</td>
     <td>{127,0,0,1}</td>
     <td>server hostname</td>
   </tr>
   <tr>
     <td>port</td>
-    <td>pos_integer()</td>
+    <td>inet:port_number()</td>
     <td>8125</td>
     <td>server port</td>
   </tr>
