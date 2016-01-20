@@ -56,6 +56,9 @@ handle_msg({cast, Packet}, #state {
     end,
     {ok, State};
 handle_msg({inet_reply, _Socket, ok}, State) ->
+    {ok, State};
+handle_msg({inet_reply, _Socket, {error, Reason}}, State) ->
+    statsderl_utils:error_msg("inet_reply error: ~p~n", [Reason]),
     {ok, State}.
 
 loop(State) ->
