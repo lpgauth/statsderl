@@ -16,7 +16,7 @@ fprofx() ->
     lists:foreach(fun code:load_abs/1, Rootnames),
 
     application:start(statsderl),
-    [statsderl:increment(["test", <<".test">>], 1, 0.25) || _ <- lists:seq(1, ?N)],
+    increment(),
 
     fprofx:start(),
     {ok, Tracer} = fprofx:profile(start),
@@ -24,7 +24,7 @@ fprofx() ->
 
     Self = self(),
     [spawn(fun () ->
-        [statsderl:increment(["test", <<".test">>], 1, 0.25) || _ <- lists:seq(1, ?N)],
+        increment(),
         Self ! exit
     end) || _ <- lists:seq(1, ?P)],
     wait(),
@@ -38,6 +38,10 @@ fprofx() ->
     ok.
 
 %% private
+increment() ->
+    [statsderl:increment(["test", <<".test">>], 1, 0.25) ||
+        _ <- lists:seq(1, ?N)].
+
 wait() ->
     wait(?P).
 
