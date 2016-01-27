@@ -1,2 +1,4 @@
-_build
+*.beam
 doc/README.md
+fprofx.*
+_build
