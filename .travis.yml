@@ -9,5 +9,5 @@ notifications:
 otp_release:
   - 18.0
   - 17.5
-script: "make test"
+script: "make travis"
 sudo: false
