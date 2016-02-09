@@ -1,6 +1,6 @@
 # statsderl
 
-High Performance StatsD Erlang client
+High Performance Erlang StatsD Client
 
 [![Build Status](https://travis-ci.org/lpgauth/statsderl.svg?branch=master)](https://travis-ci.org/lpgauth/statsderl)
 [![Coverage Status](https://coveralls.io/repos/github/lpgauth/statsderl/badge.svg?branch=master)](https://coveralls.io/github/lpgauth/statsderl?branch=master)
@@ -9,7 +9,14 @@ High Performance StatsD Erlang client
 
 * Erlang 16.0 +
 
-### Environment variables
+### Features
+
+* Performance optimized
+
+## API
+<a href="https://github.com/lpgauth/statsderl/blob/master/doc/statsderl.md#index" class="module">Function Index</a>
+
+#### Environment variables
 
 <table width="100%">
   <theader>
@@ -66,9 +73,6 @@ High Performance StatsD Erlang client
     <td>"nonode"</td>
   </tr>
 </table>
-
-## API
-<a href="https://github.com/lpgauth/statsderl/blob/master/doc/statsderl.md#index" class="module">Function Index</a>
 
 ## Examples
 
