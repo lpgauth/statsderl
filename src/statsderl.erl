@@ -4,11 +4,11 @@
 %% public
 -export([
     counter/3,
+    increment/3,
     decrement/3,
     gauge/3,
     gauge_decrement/3,
     gauge_increment/3,
-    increment/3,
     timing/3,
     timing_fun/3,
     timing_now/3
@@ -18,6 +18,11 @@
 -spec counter(key(), value(), sample_rate()) -> ok.
 
 counter(Key, Value, SampleRate) ->
+    maybe_cast(counter, Key, Value, SampleRate).
+
+-spec increment(key(), value(), sample_rate()) -> ok.
+
+increment(Key, Value, SampleRate) when Value >= 0 ->
     maybe_cast(counter, Key, Value, SampleRate).
 
 -spec decrement(key(), value(), sample_rate()) -> ok.
@@ -39,11 +44,6 @@ gauge_decrement(Key, Value, SampleRate) when Value >= 0 ->
 
 gauge_increment(Key, Value, SampleRate) when Value >= 0 ->
     maybe_cast(gauge_increment, Key, Value, SampleRate).
-
--spec increment(key(), value(), sample_rate()) -> ok.
-
-increment(Key, Value, SampleRate) when Value >= 0 ->
-    maybe_cast(counter, Key, Value, SampleRate).
 
 -spec timing(key(), value(), sample_rate()) -> ok.
 
