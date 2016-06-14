@@ -37,8 +37,9 @@ profile:
 	@$(REBAR3) as test compile
 	@erl -noshell \
 	     -pa _build/test/lib/*/ebin \
-		 -eval 'statsderl_profile:fprofx()' \
-		 -eval 'init:stop()'
+	     -pa _build/test/lib/*/test \
+	     -eval 'statsderl_profile:fprofx()' \
+	     -eval 'init:stop()'
 	@_build/test/lib/fprofx/erlgrindx -p fprofx.analysis
 	@$(CACHEGRIND) fprofx.cgrind
 

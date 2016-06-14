@@ -1,13 +1,21 @@
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gcc-5
 cache:
   directories:
     - $HOME/.cache/rebar3
     - $TRAVIS_BUILD_DIR/_build
+env:
+  - CC=gcc-5
 install: true
 language: erlang
 notifications:
   email: false
 otp_release:
-  - 18.0
+  - 18.3
   - 17.5
 script: "make travis"
 sudo: false

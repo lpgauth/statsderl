@@ -13,10 +13,10 @@
 ]).
 
 %% public
--spec start() -> ok | {error, atom()}.
+-spec start() -> {ok, [atom()]} | {error, term()}.
 
 start() ->
-    application:start(?APP).
+    application:ensure_all_started(?APP).
 
 -spec stop() -> ok | {error, {not_started, ?APP}}.
 

@@ -64,7 +64,7 @@ increment_subtest(Socket) ->
 
 sampling_rate_subtest(Socket) ->
     meck:new(statsderl_utils, [passthrough, no_history]),
-    meck:expect(statsderl_utils, random, fun (?MAX_UNSIGNED_INT_32) -> 0 end),
+    meck:expect(statsderl_utils, random, fun (?MAX_UNSIGNED_INT_32) -> 1 end),
     statsderl:counter("test", 1, 0.1234),
     assert_packet(Socket, <<"test:1|c|@0.123">>),
     meck:expect(statsderl_utils, random, fun (?MAX_UNSIGNED_INT_32) ->
