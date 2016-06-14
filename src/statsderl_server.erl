@@ -7,7 +7,7 @@
 ]).
 
 -record(state, {
-    header :: binary(),
+    header :: iodata(),
     socket :: inet:socket()
 }).
 
@@ -48,12 +48,7 @@ handle_msg({cast, Packet}, #state {
         socket = Socket
     } = State) ->
 
-    try
-        erlang:port_command(Socket, [Header, Packet])
-    catch
-        Error:Reason ->
-            statsderl_utils:error_msg("port_command ~p: ~p~n", [Error, Reason])
-    end,
+    statsderl_udp:send(Socket, Header, Packet),
     {ok, State};
 handle_msg({inet_reply, _Socket, ok}, State) ->
     {ok, State};
@@ -70,11 +65,9 @@ loop(State) ->
 udp_header(Hostname, Port, BaseKey) ->
     case statsderl_utils:getaddrs(Hostname) of
         {ok, {A, B, C, D}} ->
-            {ok, iolist_to_binary([
-                [((Port) bsr 8) band 16#ff, (Port) band 16#ff],
-                [A band 16#ff, B band 16#ff, C band 16#ff, D band 16#ff],
-                statsderl_utils:base_key(BaseKey)
-            ])};
+            Header = statsderl_udp:header({A, B, C, D}, Port),
+            BaseKey2 = statsderl_utils:base_key(BaseKey),
+            {ok, [Header, BaseKey2]};
         {error, Reason} ->
             {error, Reason}
     end.
