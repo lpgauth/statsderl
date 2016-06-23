@@ -33,7 +33,7 @@ High Performance Erlang StatsD Client
   </tr>
   <tr>
     <td>hostname</td>
-    <td>inet:ip_address() | inet:hostname() | binary()</td>
+    <td>inet:ip_address() | inet:hostname() | binary() | [{inet:ip_address() | inet:hostname() | binary(), inet:port_number()}]</td>
     <td>{127,0,0,1}</td>
     <td>server hostname</td>
   </tr>
@@ -41,7 +41,7 @@ High Performance Erlang StatsD Client
     <td>port</td>
     <td>inet:port_number()</td>
     <td>8125</td>
-    <td>server port</td>
+    <td>server port. Not needed when using the list syntax in the hostname variable</td>
   </tr>
 </table>
 

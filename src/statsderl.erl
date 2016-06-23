@@ -71,8 +71,9 @@ cast(OpCode, Key, Value, SampleRate) ->
     cast(OpCode, Key, Value, SampleRate, ServerName).
 
 cast(OpCode, Key, Value, SampleRate, ServerName) ->
+    KeyHash = erlang:phash2(iolist_to_binary(Key)),
     Packet = statsderl_protocol:encode(OpCode, Key, Value, SampleRate),
-    send(ServerName, {cast, Packet}).
+    send(ServerName, {cast, KeyHash, Packet}).
 
 maybe_cast(OpCode, Key, Value, 1) ->
     cast(OpCode, Key, Value, 1);
