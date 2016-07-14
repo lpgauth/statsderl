@@ -11,16 +11,11 @@
 -spec fprofx() -> ok.
 
 fprofx() ->
-    Filenames = filelib:wildcard("_build/default/lib/*/ebin/*.beam"),
-    Rootnames = [filename:rootname(Filename, ".beam") || Filename <- Filenames],
-    lists:foreach(fun code:load_abs/1, Rootnames),
-
-    application:start(statsderl),
-    increment(),
-
+    preload_modules(),
     fprofx:start(),
     {ok, Tracer} = fprofx:profile(start),
     fprofx:trace([start, {procs, new}, {tracer, Tracer}]),
+    application:start(statsderl),
 
     Self = self(),
     [spawn(fun () ->
@@ -32,7 +27,6 @@ fprofx() ->
     fprofx:trace(stop),
     fprofx:analyse([totals, {dest, ""}]),
     fprofx:stop(),
-
     application:stop(statsderl),
 
     ok.
@@ -41,6 +35,11 @@ fprofx() ->
 increment() ->
     [statsderl:increment(["test", <<".test">>], 1, 0.25) ||
         _ <- lists:seq(1, ?N)].
+
+preload_modules() ->
+    Filenames = filelib:wildcard("_build/default/lib/*/ebin/*.beam"),
+    Rootnames = [filename:rootname(Filename, ".beam") || Filename <- Filenames],
+    lists:foreach(fun code:load_abs/1, Rootnames).
 
 wait() ->
     wait(?P).
