@@ -14,7 +14,8 @@
     increment/3,
     timing/3,
     timing_fun/3,
-    timing_now/3
+    timing_now/3,
+    timing_now_us/3
 ]).
 
 %% public
@@ -66,6 +67,11 @@ timing_fun(Key, Fun, SampleRate) ->
 timing_now(Key, Timestamp, SampleRate) ->
     maybe_cast(timing_now, Key, Timestamp, SampleRate).
 
+-spec timing_now_us(key(), erlang:timestamp(), sample_rate()) -> ok.
+
+timing_now_us(Key, Timestamp, SampleRate) ->
+    maybe_cast(timing_now_us, Key, Timestamp, SampleRate).
+
 %% private
 cast(OpCode, Key, Value, SampleRate) ->
     ServerName = statsderl_utils:random_server(),
@@ -77,10 +83,14 @@ cast(OpCode, Key, Value, SampleRate, ServerName) ->
 
 maybe_cast(timing_now, Key, Value, 1) ->
     cast(timing, Key, timing_now(Value), 1);
+maybe_cast(timing_now_us, Key, Value, 1) ->
+    cast(timing, Key, timing_now_us(Value), 1);
 maybe_cast(OpCode, Key, Value, 1) ->
     cast(OpCode, Key, Value, 1);
 maybe_cast(timing_now, Key, Value, 1.0) ->
     cast(timing, Key, timing_now(Value), 1.0);
+maybe_cast(timing_now_us, Key, Value, 1.0) ->
+    cast(timing, Key, timing_now_us(Value), 1.0);
 maybe_cast(OpCode, Key, Value, 1.0) ->
     cast(OpCode, Key, Value, 1);
 maybe_cast(OpCode, Key, Value, SampleRate) ->
@@ -92,6 +102,9 @@ maybe_cast(OpCode, Key, Value, SampleRate) ->
             case OpCode of
                 timing_now ->
                     cast(timing, Key, timing_now(Value), SampleRate,
+                        ServerName);
+                timing_now_us ->
+                    cast(timing, Key, timing_now_us(Value), SampleRate,
                         ServerName);
                 _ ->
                     cast(OpCode, Key, Value, SampleRate, ServerName)
@@ -110,5 +123,8 @@ send(ServerName, Msg) ->
     end.
 
 timing_now(Timestamp) ->
+    timing_now_us(Timestamp) div 1000.
+
+timing_now_us(Timestamp) ->
     Timestamp2 = statsderl_utils:timestamp(),
-    timer:now_diff(Timestamp2, Timestamp) div 1000.
+    timer:now_diff(Timestamp2, Timestamp).
