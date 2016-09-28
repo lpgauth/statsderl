@@ -76,15 +76,11 @@ cast(OpCode, Key, Value, SampleRate, ServerName) ->
     send(ServerName, {cast, Packet}).
 
 maybe_cast(timing_now, Key, Value, 1) ->
-    Timestamp = statsderl_utils:timestamp(),
-    Value2 = timer:now_diff(Timestamp, Value) div 1000,
-    cast(timing, Key, Value2, 1);
+    cast(timing, Key, timing_now(Value), 1);
 maybe_cast(OpCode, Key, Value, 1) ->
     cast(OpCode, Key, Value, 1);
 maybe_cast(timing_now, Key, Value, 1.0) ->
-    Timestamp = statsderl_utils:timestamp(),
-    Value2 = timer:now_diff(Timestamp, Value) div 1000,
-    cast(timing, Key, Value2, 1.0);
+    cast(timing, Key, timing_now(Value), 1.0);
 maybe_cast(OpCode, Key, Value, 1.0) ->
     cast(OpCode, Key, Value, 1);
 maybe_cast(OpCode, Key, Value, SampleRate) ->
@@ -95,9 +91,7 @@ maybe_cast(OpCode, Key, Value, SampleRate) ->
             ServerName = statsderl_utils:server_name(N),
             case OpCode of
                 timing_now ->
-                    Timestamp = statsderl_utils:timestamp(),
-                    Value2 = timer:now_diff(Timestamp, Value) div 1000,
-                    cast(timing, Key, Value2, SampleRate, ServerName);
+                    cast(timing, Key, timing_now(Value), SampleRate, ServerName);
                 _ ->
                     cast(OpCode, Key, Value, SampleRate, ServerName)
             end;
@@ -113,3 +107,7 @@ send(ServerName, Msg) ->
         error:badarg ->
             ok
     end.
+
+timing_now(Timestamp) ->
+    Timestamp2 = statsderl_utils:timestamp(),
+    timer:now_diff(Timestamp2, Timestamp) div 1000.
