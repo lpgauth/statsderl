@@ -101,9 +101,11 @@ maybe_cast(OpCode, Key, Value, SampleRate) ->
             ServerName = statsderl_utils:server_name(N),
             case OpCode of
                 timing_now ->
-                    cast(timing, Key, timing_now(Value), SampleRate, ServerName);
+                    cast(timing, Key, timing_now(Value), SampleRate,
+                        ServerName);
                 timing_now_us ->
-                    cast(timing, Key, timing_now_us(Value), SampleRate, ServerName);
+                    cast(timing, Key, timing_now_us(Value), SampleRate,
+                        ServerName);
                 _ ->
                     cast(OpCode, Key, Value, SampleRate, ServerName)
             end;
