@@ -1,6 +1,9 @@
 -module(statsderl).
 -include("statsderl.hrl").
 
+-compile(inline).
+-compile({inline_size, 512}).
+
 %% public
 -export([
     counter/3,
@@ -61,9 +64,7 @@ timing_fun(Key, Fun, SampleRate) ->
 -spec timing_now(key(), erlang:timestamp(), sample_rate()) -> ok.
 
 timing_now(Key, Timestamp, SampleRate) ->
-    Timestamp2 = statsderl_utils:timestamp(),
-    Value = timer:now_diff(Timestamp2, Timestamp) div 1000,
-    timing(Key, Value, SampleRate).
+    maybe_cast(timing_now, Key, Timestamp, SampleRate).
 
 %% private
 cast(OpCode, Key, Value, SampleRate) ->
@@ -74,8 +75,16 @@ cast(OpCode, Key, Value, SampleRate, ServerName) ->
     Packet = statsderl_protocol:encode(OpCode, Key, Value, SampleRate),
     send(ServerName, {cast, Packet}).
 
+maybe_cast(timing_now, Key, Value, 1) ->
+    Timestamp = statsderl_utils:timestamp(),
+    Value2 = timer:now_diff(Timestamp, Value) div 1000,
+    cast(timing, Key, Value2, 1);
 maybe_cast(OpCode, Key, Value, 1) ->
     cast(OpCode, Key, Value, 1);
+maybe_cast(timing_now, Key, Value, 1.0) ->
+    Timestamp = statsderl_utils:timestamp(),
+    Value2 = timer:now_diff(Timestamp, Value) div 1000,
+    cast(timing, Key, Value2, 1.0);
 maybe_cast(OpCode, Key, Value, 1.0) ->
     cast(OpCode, Key, Value, 1);
 maybe_cast(OpCode, Key, Value, SampleRate) ->
@@ -84,14 +93,21 @@ maybe_cast(OpCode, Key, Value, SampleRate) ->
         true  ->
             N = Rand rem ?POOL_SIZE + 1,
             ServerName = statsderl_utils:server_name(N),
-            cast(OpCode, Key, Value, SampleRate, ServerName);
+            case OpCode of
+                timing_now ->
+                    Timestamp = statsderl_utils:timestamp(),
+                    Value2 = timer:now_diff(Timestamp, Value) div 1000,
+                    cast(timing, Key, Value2, SampleRate, ServerName);
+                _ ->
+                    cast(OpCode, Key, Value, SampleRate, ServerName)
+            end;
         false ->
             ok
     end.
 
 send(ServerName, Msg) ->
     try
-        whereis(ServerName) ! Msg,
+        ServerName ! Msg,
         ok
     catch
         error:badarg ->
