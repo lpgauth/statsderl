@@ -19,7 +19,7 @@ fprofx() ->
 
     Self = self(),
     [spawn(fun () ->
-        increment(),
+        timing_now(),
         Self ! exit
     end) || _ <- lists:seq(1, ?P)],
     wait(),
@@ -32,8 +32,9 @@ fprofx() ->
     ok.
 
 %% private
-increment() ->
-    [statsderl:increment(["test", <<".test">>], 1, 0.25) ||
+timing_now() ->
+    Timestamp = os:timestamp(),
+    [statsderl:timing_now(["test", <<".test">>], Timestamp, 0.25) ||
         _ <- lists:seq(1, ?N)].
 
 preload_modules() ->
