@@ -99,7 +99,7 @@ maybe_cast(OpCode, Key, Value, SampleRate) ->
 
 send(ServerName, Msg) ->
     try
-        whereis(ServerName) ! Msg,
+        ServerName ! Msg,
         ok
     catch
         error:badarg ->
