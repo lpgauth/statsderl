@@ -122,8 +122,6 @@ make test
 
 ### TODOs
 
-* NIF for faster random
-* parse transform for severity levels (debug, development, production)
 * parse transform for type conversion
 
 ## License
