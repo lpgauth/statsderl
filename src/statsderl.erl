@@ -1,6 +1,9 @@
 -module(statsderl).
 -include("statsderl.hrl").
 
+-compile(inline).
+-compile({inline_size, 512}).
+
 %% public
 -export([
     counter/3,

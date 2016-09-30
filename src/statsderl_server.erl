@@ -1,6 +1,9 @@
 -module(statsderl_server).
 -include("statsderl.hrl").
 
+-compile(inline).
+-compile({inline_size, 512}).
+
 -export([
     init/2,
     start_link/1

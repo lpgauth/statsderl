@@ -1,6 +1,9 @@
 -module(statsderl_protocol).
 -include("statsderl.hrl").
 
+-compile(inline).
+-compile({inline_size, 512}).
+
 -export([
     encode/4
 ]).
