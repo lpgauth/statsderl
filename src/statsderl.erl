@@ -61,9 +61,7 @@ timing_fun(Key, Fun, SampleRate) ->
 -spec timing_now(key(), erlang:timestamp(), sample_rate()) -> ok.
 
 timing_now(Key, Timestamp, SampleRate) ->
-    Timestamp2 = statsderl_utils:timestamp(),
-    Value = timer:now_diff(Timestamp2, Timestamp) div 1000,
-    timing(Key, Value, SampleRate).
+    maybe_cast(timing_now, Key, Timestamp, SampleRate).
 
 %% private
 cast(OpCode, Key, Value, SampleRate) ->
@@ -74,8 +72,12 @@ cast(OpCode, Key, Value, SampleRate, ServerName) ->
     Packet = statsderl_protocol:encode(OpCode, Key, Value, SampleRate),
     send(ServerName, {cast, Packet}).
 
+maybe_cast(timing_now, Key, Value, 1) ->
+    cast(timing, Key, timing_now(Value), 1);
 maybe_cast(OpCode, Key, Value, 1) ->
     cast(OpCode, Key, Value, 1);
+maybe_cast(timing_now, Key, Value, 1.0) ->
+    cast(timing, Key, timing_now(Value), 1.0);
 maybe_cast(OpCode, Key, Value, 1.0) ->
     cast(OpCode, Key, Value, 1);
 maybe_cast(OpCode, Key, Value, SampleRate) ->
@@ -84,7 +86,13 @@ maybe_cast(OpCode, Key, Value, SampleRate) ->
         true  ->
             N = Rand rem ?POOL_SIZE + 1,
             ServerName = statsderl_utils:server_name(N),
-            cast(OpCode, Key, Value, SampleRate, ServerName);
+            case OpCode of
+                timing_now ->
+                    cast(timing, Key, timing_now(Value), SampleRate,
+                        ServerName);
+                _ ->
+                    cast(OpCode, Key, Value, SampleRate, ServerName)
+            end;
         false ->
             ok
     end.
@@ -97,3 +105,7 @@ send(ServerName, Msg) ->
         error:badarg ->
             ok
     end.
+
+timing_now(Timestamp) ->
+    Timestamp2 = statsderl_utils:timestamp(),
+    timer:now_diff(Timestamp2, Timestamp) div 1000.
