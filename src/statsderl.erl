@@ -1,3 +1,8 @@
+%% @doc Functions to send data to a StatsD server. In this module, the
+%% SampleRate parameter is a float value between 0 and 1 that
+%% indicates how frequently the data should actually be sent. For
+%% counters, the server takes the sample rate into account.
+
 -module(statsderl).
 -include("statsderl.hrl").
 
@@ -7,11 +12,11 @@
 %% public
 -export([
     counter/3,
+    increment/3,
     decrement/3,
     gauge/3,
     gauge_decrement/3,
     gauge_increment/3,
-    increment/3,
     timing/3,
     timing_fun/3,
     timing_now/3,
@@ -20,42 +25,42 @@
 
 %% public
 -spec counter(key(), value(), sample_rate()) -> ok.
-
+%% @doc Increment a counter (identical to increment/3).
 counter(Key, Value, SampleRate) ->
     maybe_cast(counter, Key, Value, SampleRate).
 
--spec decrement(key(), value(), sample_rate()) -> ok.
+-spec increment(key(), value(), sample_rate()) -> ok.
+%% @doc Increment a counter.
+increment(Key, Value, SampleRate) when Value >= 0 ->
+    maybe_cast(counter, Key, Value, SampleRate).
 
+-spec decrement(key(), value(), sample_rate()) -> ok.
+%% @doc Decrement a counter.
 decrement(Key, Value, SampleRate) when Value >= 0 ->
     maybe_cast(counter, Key, -Value, SampleRate).
 
 -spec gauge(key(), value(), sample_rate()) -> ok.
-
+%% @doc Set a gauge value.
 gauge(Key, Value, SampleRate) when Value >= 0 ->
     maybe_cast(gauge, Key, Value, SampleRate).
 
 -spec gauge_decrement(key(), value(), sample_rate()) -> ok.
-
+%% @doc Decrement a gauge value.
 gauge_decrement(Key, Value, SampleRate) when Value >= 0 ->
     maybe_cast(gauge_decrement, Key, Value, SampleRate).
 
 -spec gauge_increment(key(), value(), sample_rate()) -> ok.
-
+%% @doc Increment a gauge value.
 gauge_increment(Key, Value, SampleRate) when Value >= 0 ->
     maybe_cast(gauge_increment, Key, Value, SampleRate).
 
--spec increment(key(), value(), sample_rate()) -> ok.
-
-increment(Key, Value, SampleRate) when Value >= 0 ->
-    maybe_cast(counter, Key, Value, SampleRate).
-
 -spec timing(key(), value(), sample_rate()) -> ok.
-
+%% @doc Record timer information.
 timing(Key, Value, SampleRate) ->
     maybe_cast(timing, Key, Value, SampleRate).
 
 -spec timing_fun(key(), fun(), sample_rate()) -> ok.
-
+%% @doc Run nullary function and record the time spent.
 timing_fun(Key, Fun, SampleRate) ->
     Timestamp = statsderl_utils:timestamp(),
     Result = Fun(),
@@ -63,7 +68,7 @@ timing_fun(Key, Fun, SampleRate) ->
     Result.
 
 -spec timing_now(key(), erlang:timestamp(), sample_rate()) -> ok.
-
+%% @doc Record time spent between the timestamp passed and now.
 timing_now(Key, Timestamp, SampleRate) ->
     maybe_cast(timing_now, Key, Timestamp, SampleRate).
 
