@@ -44,7 +44,7 @@ value() = number()
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#counter-3">counter/3</a></td><td></td></tr><tr><td valign="top"><a href="#decrement-3">decrement/3</a></td><td></td></tr><tr><td valign="top"><a href="#gauge-3">gauge/3</a></td><td></td></tr><tr><td valign="top"><a href="#gauge_decrement-3">gauge_decrement/3</a></td><td></td></tr><tr><td valign="top"><a href="#gauge_increment-3">gauge_increment/3</a></td><td></td></tr><tr><td valign="top"><a href="#increment-3">increment/3</a></td><td></td></tr><tr><td valign="top"><a href="#timing-3">timing/3</a></td><td></td></tr><tr><td valign="top"><a href="#timing_fun-3">timing_fun/3</a></td><td></td></tr><tr><td valign="top"><a href="#timing_now-3">timing_now/3</a></td><td></td></tr></table>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#counter-3">counter/3</a></td><td></td></tr><tr><td valign="top"><a href="#decrement-3">decrement/3</a></td><td></td></tr><tr><td valign="top"><a href="#gauge-3">gauge/3</a></td><td></td></tr><tr><td valign="top"><a href="#gauge_decrement-3">gauge_decrement/3</a></td><td></td></tr><tr><td valign="top"><a href="#gauge_increment-3">gauge_increment/3</a></td><td></td></tr><tr><td valign="top"><a href="#increment-3">increment/3</a></td><td></td></tr><tr><td valign="top"><a href="#timing-3">timing/3</a></td><td></td></tr><tr><td valign="top"><a href="#timing_fun-3">timing_fun/3</a></td><td></td></tr><tr><td valign="top"><a href="#timing_now-3">timing_now/3</a></td><td></td></tr><tr><td valign="top"><a href="#timing_now_us-3">timing_now_us/3</a></td><td></td></tr></table>
 
 
 <a name="functions"></a>
@@ -129,6 +129,15 @@ timing_fun(Key::<a href="#type-key">key()</a>, Fun::function(), SampleRate::<a h
 
 <pre><code>
 timing_now(Key::<a href="#type-key">key()</a>, Timestamp::<a href="erlang.md#type-timestamp">erlang:timestamp()</a>, SampleRate::<a href="#type-sample_rate">sample_rate()</a>) -&gt; ok
+</code></pre>
+<br />
+
+<a name="timing_now_us-3"></a>
+
+### timing_now_us/3 ###
+
+<pre><code>
+timing_now_us(Key::<a href="#type-key">key()</a>, Timestamp::<a href="erlang.md#type-timestamp">erlang:timestamp()</a>, SampleRate::<a href="#type-sample_rate">sample_rate()</a>) -&gt; ok
 </code></pre>
 <br />
 

@@ -23,7 +23,7 @@ __Behaviours:__ [`application`](application.md).
 ### start/0 ###
 
 <pre><code>
-start() -&gt; ok | {error, atom()}
+start() -&gt; {ok, [atom()]} | {error, term()}
 </code></pre>
 <br />
 
