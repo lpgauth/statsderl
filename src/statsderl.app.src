@@ -1,6 +1,6 @@
 {application, statsderl, [
   {description, "statsd client"},
-  {vsn, "0.4.7"},
+  {vsn, "0.4.8"},
   {registered, []},
   {applications, [
     kernel,

@@ -19,42 +19,50 @@
 ]).
 
 %% public
--spec counter(key(), value(), sample_rate()) -> ok.
+-spec counter(key(), value(), sample_rate()) ->
+    ok.
 
 counter(Key, Value, SampleRate) ->
-    maybe_cast(counter, Key, Value, SampleRate).
+    sample(counter, Key, Value, SampleRate).
 
--spec decrement(key(), value(), sample_rate()) -> ok.
+-spec decrement(key(), value(), sample_rate()) ->
+    ok.
 
 decrement(Key, Value, SampleRate) when Value >= 0 ->
-    maybe_cast(counter, Key, -Value, SampleRate).
+    sample(counter, Key, -Value, SampleRate).
 
--spec gauge(key(), value(), sample_rate()) -> ok.
+-spec gauge(key(), value(), sample_rate()) ->
+    ok.
 
 gauge(Key, Value, SampleRate) when Value >= 0 ->
-    maybe_cast(gauge, Key, Value, SampleRate).
+    sample(gauge, Key, Value, SampleRate).
 
--spec gauge_decrement(key(), value(), sample_rate()) -> ok.
+-spec gauge_decrement(key(), value(), sample_rate()) ->
+    ok.
 
 gauge_decrement(Key, Value, SampleRate) when Value >= 0 ->
-    maybe_cast(gauge_decrement, Key, Value, SampleRate).
+    sample(gauge_decrement, Key, Value, SampleRate).
 
--spec gauge_increment(key(), value(), sample_rate()) -> ok.
+-spec gauge_increment(key(), value(), sample_rate()) ->
+    ok.
 
 gauge_increment(Key, Value, SampleRate) when Value >= 0 ->
-    maybe_cast(gauge_increment, Key, Value, SampleRate).
+    sample(gauge_increment, Key, Value, SampleRate).
 
--spec increment(key(), value(), sample_rate()) -> ok.
+-spec increment(key(), value(), sample_rate()) ->
+    ok.
 
 increment(Key, Value, SampleRate) when Value >= 0 ->
-    maybe_cast(counter, Key, Value, SampleRate).
+    sample(counter, Key, Value, SampleRate).
 
--spec timing(key(), value(), sample_rate()) -> ok.
+-spec timing(key(), value(), sample_rate()) ->
+    ok.
 
 timing(Key, Value, SampleRate) ->
-    maybe_cast(timing, Key, Value, SampleRate).
+    sample(timing, Key, Value, SampleRate).
 
--spec timing_fun(key(), fun(), sample_rate()) -> ok.
+-spec timing_fun(key(), fun(), sample_rate()) ->
+    ok.
 
 timing_fun(Key, Fun, SampleRate) ->
     Timestamp = statsderl_utils:timestamp(),
@@ -62,64 +70,55 @@ timing_fun(Key, Fun, SampleRate) ->
     timing_now(Key, Timestamp, SampleRate),
     Result.
 
--spec timing_now(key(), erlang:timestamp(), sample_rate()) -> ok.
+-spec timing_now(key(), erlang:timestamp(), sample_rate()) ->
+    ok.
 
 timing_now(Key, Timestamp, SampleRate) ->
-    maybe_cast(timing_now, Key, Timestamp, SampleRate).
+    sample(timing_now, Key, Timestamp, SampleRate).
 
--spec timing_now_us(key(), erlang:timestamp(), sample_rate()) -> ok.
+-spec timing_now_us(key(), erlang:timestamp(), sample_rate()) ->
+    ok.
 
 timing_now_us(Key, Timestamp, SampleRate) ->
-    maybe_cast(timing_now_us, Key, Timestamp, SampleRate).
+    sample(timing_now_us, Key, Timestamp, SampleRate).
 
 %% private
-cast(OpCode, Key, Value, SampleRate) ->
-    ServerName = statsderl_utils:random_server(),
-    cast(OpCode, Key, Value, SampleRate, ServerName).
-
 cast(OpCode, Key, Value, SampleRate, ServerName) ->
     Packet = statsderl_protocol:encode(OpCode, Key, Value, SampleRate),
     send(ServerName, {cast, Packet}).
 
-maybe_cast(timing_now, Key, Value, 1) ->
-    cast(timing, Key, timing_now(Value), 1);
-maybe_cast(timing_now_us, Key, Value, 1) ->
-    cast(timing, Key, timing_now_us(Value), 1);
-maybe_cast(OpCode, Key, Value, 1) ->
-    cast(OpCode, Key, Value, 1);
-maybe_cast(timing_now, Key, Value, 1.0) ->
-    cast(timing, Key, timing_now(Value), 1.0);
-maybe_cast(timing_now_us, Key, Value, 1.0) ->
-    cast(timing, Key, timing_now_us(Value), 1.0);
-maybe_cast(OpCode, Key, Value, 1.0) ->
-    cast(OpCode, Key, Value, 1);
-maybe_cast(OpCode, Key, Value, SampleRate) ->
+operation(OpCode, Key, Value, SampleRate) ->
+    ServerName = statsderl_utils:random_server(),
+    operation(OpCode, Key, Value, SampleRate, ServerName).
+
+operation(timing_now, Key, Value, SampleRate, ServerName) ->
+    cast(timing, Key, timing_now(Value), SampleRate, ServerName);
+operation(timing_now_us, Key, Value, SampleRate, ServerName) ->
+    cast(timing, Key, timing_now_us(Value), SampleRate, ServerName);
+operation(OpCode, Key, Value, SampleRate, ServerName) ->
+    cast(OpCode, Key, Value, SampleRate, ServerName).
+
+sample(OpCode, Key, Value, 1) ->
+    operation(OpCode, Key, Value, 1);
+sample(OpCode, Key, Value, 1.0) ->
+    operation(OpCode, Key, Value, 1);
+sample(OpCode, Key, Value, SampleRate) ->
     Rand = statsderl_utils:random(?MAX_UNSIGNED_INT_32),
     case Rand =< SampleRate * ?MAX_UNSIGNED_INT_32 of
         true  ->
             N = Rand rem ?POOL_SIZE + 1,
             ServerName = statsderl_utils:server_name(N),
-            case OpCode of
-                timing_now ->
-                    cast(timing, Key, timing_now(Value), SampleRate,
-                        ServerName);
-                timing_now_us ->
-                    cast(timing, Key, timing_now_us(Value), SampleRate,
-                        ServerName);
-                _ ->
-                    cast(OpCode, Key, Value, SampleRate, ServerName)
-            end;
+            operation(OpCode, Key, Value, SampleRate, ServerName);
         false ->
             ok
     end.
 
 send(ServerName, Msg) ->
-    try
-        ServerName ! Msg,
-        ok
-    catch
-        error:badarg ->
-            ok
+    case whereis(ServerName) of
+        undefined ->
+            ok;
+        Pid ->
+            Pid ! Msg
     end.
 
 timing_now(Timestamp) ->
