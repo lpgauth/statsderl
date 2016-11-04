@@ -50,9 +50,9 @@ getaddrs(Hostname) when is_binary(Hostname) ->
 getaddrs(Hostname) ->
     case inet:getaddrs(Hostname, inet) of
         {ok, Addrs} ->
-            {ok, statsderl_utils:random_element(Addrs)};
+            {ok, random_element(Addrs)};
         {error, Reason} ->
-            statsderl_utils:error_msg("getaddrs error: ~p~n", [Reason]),
+            error_msg("getaddrs error: ~p~n", [Reason]),
             {error, Reason}
     end.
 
@@ -67,7 +67,7 @@ random_element([Element]) ->
     Element;
 random_element([_|_] = List) ->
     T = list_to_tuple(List),
-    Index = statsderl_utils:random(tuple_size(T)),
+    Index = random(tuple_size(T)),
     element(Index, T).
 
 -spec random_server() -> atom().
