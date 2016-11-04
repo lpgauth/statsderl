@@ -1,4 +1,8 @@
 [{<<"granderl">>,
   {git,"https://github.com/tokenrove/granderl.git",
        {ref,"b44725cdd3ae6d2d4170e0d72ebb2fcad98d5ad2"}},
+  0},
+ {<<"parse_trans">>,
+  {git,"https://github.com/uwiger/parse_trans.git",
+       {ref,"6f3645afb43c7c57d61b54ef59aecab288ce1013"}},
   0}].

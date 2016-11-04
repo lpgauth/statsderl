@@ -17,8 +17,13 @@
 -type base_key() :: base_key_part() | [base_key_part()].
 -type base_key_part() :: hostname | name | sname | undefined | iodata().
 -type key() :: iodata().
--type op_code() :: decrement | gauge | gauge_decrement | gauge_increment |
-    increment | timing.
+-type operation() :: {cast, iodata()} |
+                     {counter, key(), value(), sample_rate()} |
+                     {gauge, key(), value()} |
+                     {gauge_decrement, key(), value()} |
+                     {gauge_increment, key(), value()} |
+                     {timing, key(), value()} |
+                     {timing_now, key(), erlang:timestamp()} |
+                     {timing_now_us, key(), erlang:timestamp()}.
 -type sample_rate() :: number().
 -type value() :: number().
-

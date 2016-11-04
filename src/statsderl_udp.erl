@@ -5,15 +5,15 @@
 -compile({inline_size, 512}).
 
 -export([
-    header/2,
-    send/3
+    header/2
 ]).
 
 -define(INET_AF_INET, 1).
 -define(INT16(X), [((X) bsr 8) band 16#ff, (X) band 16#ff]).
 
 %% public
--spec header(inet:ip_address(), inet:port_number()) -> iodata().
+-spec header(inet:ip_address(), inet:port_number()) ->
+    iodata().
 
 -ifdef(UDP_HEADER).
 
@@ -26,19 +26,6 @@ header(IP, Port) ->
     [?INT16(Port) | ip4_to_bytes(IP)].
 
 -endif.
-
--spec send(inet:socket(), iodata(), iodata()) ->
-    ok | {error, term()}.
-
-send(Socket, Header, Data) ->
-    try
-        true = erlang:port_command(Socket, [Header, Data]),
-        ok
-    catch
-        Error:Reason ->
-            statsderl_utils:error_msg("port_command ~p: ~p~n", [Error, Reason]),
-            {error, {Error, Reason}}
-    end.
 
 %% private
 ip4_to_bytes({A, B, C, D}) ->

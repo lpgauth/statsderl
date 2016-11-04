@@ -15,7 +15,8 @@
 }).
 
 %% public
--spec init(pid(), atom()) -> no_return().
+-spec init(pid(), atom()) ->
+    no_return().
 
 init(Parent, Name) ->
     BaseKey = ?ENV(?ENV_BASEKEY, ?DEFAULT_BASEKEY),
@@ -40,29 +41,27 @@ init(Parent, Name) ->
             exit(Reason)
     end.
 
--spec start_link(atom()) -> {ok, pid()}.
+-spec start_link(atom()) ->
+    {ok, pid()}.
 
 start_link(Name) ->
     proc_lib:start_link(?MODULE, init, [self(), Name]).
 
 %% private
-handle_msg({cast, Packet}, #state {
+loop(#state {
         header = Header,
         socket = Socket
     } = State) ->
 
-    statsderl_udp:send(Socket, Header, Packet),
-    {ok, State};
-handle_msg({inet_reply, _Socket, ok}, State) ->
-    {ok, State};
-handle_msg({inet_reply, _Socket, {error, Reason}}, State) ->
-    statsderl_utils:error_msg("inet_reply error: ~p~n", [Reason]),
-    {ok, State}.
-
-loop(State) ->
-    receive Msg ->
-        {ok, State2} = handle_msg(Msg, State),
-        loop(State2)
+    receive
+        {cast, Packet} ->
+            erlang:port_command(Socket, [Header, Packet]),
+            loop(State);
+        {inet_reply, _Socket, ok} ->
+            loop(State);
+        {inet_reply, _Socket, {error, Reason}} ->
+            statsderl_utils:error_msg("inet_reply error: ~p~n", [Reason]),
+            loop(State)
     end.
 
 udp_header(Hostname, Port, BaseKey) ->

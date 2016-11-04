@@ -22,108 +22,62 @@
 -spec counter(key(), value(), sample_rate()) ->
     ok.
 
-counter(Key, Value, SampleRate) ->
-    sample(counter, Key, Value, SampleRate).
+counter(Key, Value, Rate) ->
+    statsderl_pool:sample(Rate, {counter, Key, Value, Rate}).
 
 -spec decrement(key(), value(), sample_rate()) ->
     ok.
 
-decrement(Key, Value, SampleRate) when Value >= 0 ->
-    sample(counter, Key, -Value, SampleRate).
+decrement(Key, Value, Rate) when Value >= 0 ->
+    statsderl_pool:sample(Rate, {counter, Key, -Value, Rate}).
 
 -spec gauge(key(), value(), sample_rate()) ->
     ok.
 
-gauge(Key, Value, SampleRate) when Value >= 0 ->
-    sample(gauge, Key, Value, SampleRate).
+gauge(Key, Value, Rate) when Value >= 0 ->
+    statsderl_pool:sample(Rate, {gauge, Key, Value}).
 
 -spec gauge_decrement(key(), value(), sample_rate()) ->
     ok.
 
-gauge_decrement(Key, Value, SampleRate) when Value >= 0 ->
-    sample(gauge_decrement, Key, Value, SampleRate).
+gauge_decrement(Key, Value, Rate) when Value >= 0 ->
+    statsderl_pool:sample(Rate, {gauge_decrement, Key, Value}).
 
 -spec gauge_increment(key(), value(), sample_rate()) ->
     ok.
 
-gauge_increment(Key, Value, SampleRate) when Value >= 0 ->
-    sample(gauge_increment, Key, Value, SampleRate).
+gauge_increment(Key, Value, Rate) when Value >= 0 ->
+    statsderl_pool:sample(Rate, {gauge_increment, Key, Value}).
 
 -spec increment(key(), value(), sample_rate()) ->
     ok.
 
-increment(Key, Value, SampleRate) when Value >= 0 ->
-    sample(counter, Key, Value, SampleRate).
+increment(Key, Value, Rate) when Value >= 0 ->
+    statsderl_pool:sample(Rate, {counter, Key, Value, Rate}).
 
 -spec timing(key(), value(), sample_rate()) ->
     ok.
 
-timing(Key, Value, SampleRate) ->
-    sample(timing, Key, Value, SampleRate).
+timing(Key, Value, Rate) ->
+    statsderl_pool:sample(Rate, {timing, Key, Value}).
 
 -spec timing_fun(key(), fun(), sample_rate()) ->
     ok.
 
-timing_fun(Key, Fun, SampleRate) ->
+timing_fun(Key, Fun, Rate) ->
     Timestamp = statsderl_utils:timestamp(),
     Result = Fun(),
-    timing_now(Key, Timestamp, SampleRate),
+    timing_now(Key, Timestamp, Rate),
     Result.
 
 -spec timing_now(key(), erlang:timestamp(), sample_rate()) ->
     ok.
 
-timing_now(Key, Timestamp, SampleRate) ->
-    sample(timing_now, Key, Timestamp, SampleRate).
+timing_now(Key, Timestamp, Rate) ->
+    statsderl_pool:sample(Rate, {timing_now, Key, Timestamp}).
 
 -spec timing_now_us(key(), erlang:timestamp(), sample_rate()) ->
     ok.
 
-timing_now_us(Key, Timestamp, SampleRate) ->
-    sample(timing_now_us, Key, Timestamp, SampleRate).
-
-%% private
-cast(OpCode, Key, Value, SampleRate, ServerName) ->
-    Packet = statsderl_protocol:encode(OpCode, Key, Value, SampleRate),
-    send(ServerName, {cast, Packet}).
-
-operation(OpCode, Key, Value, SampleRate) ->
-    ServerName = statsderl_utils:random_server(),
-    operation(OpCode, Key, Value, SampleRate, ServerName).
-
-operation(timing_now, Key, Value, SampleRate, ServerName) ->
-    cast(timing, Key, timing_now(Value), SampleRate, ServerName);
-operation(timing_now_us, Key, Value, SampleRate, ServerName) ->
-    cast(timing, Key, timing_now_us(Value), SampleRate, ServerName);
-operation(OpCode, Key, Value, SampleRate, ServerName) ->
-    cast(OpCode, Key, Value, SampleRate, ServerName).
-
-sample(OpCode, Key, Value, 1) ->
-    operation(OpCode, Key, Value, 1);
-sample(OpCode, Key, Value, 1.0) ->
-    operation(OpCode, Key, Value, 1);
-sample(OpCode, Key, Value, SampleRate) ->
-    Rand = statsderl_utils:random(?MAX_UNSIGNED_INT_32),
-    case Rand =< SampleRate * ?MAX_UNSIGNED_INT_32 of
-        true  ->
-            N = Rand rem ?POOL_SIZE + 1,
-            ServerName = statsderl_utils:server_name(N),
-            operation(OpCode, Key, Value, SampleRate, ServerName);
-        false ->
-            ok
-    end.
-
-send(ServerName, Msg) ->
-    case whereis(ServerName) of
-        undefined ->
-            ok;
-        Pid ->
-            Pid ! Msg
-    end.
-
-timing_now(Timestamp) ->
-    timing_now_us(Timestamp) div 1000.
-
-timing_now_us(Timestamp) ->
-    Timestamp2 = statsderl_utils:timestamp(),
-    timer:now_diff(Timestamp2, Timestamp).
+timing_now_us(Key, Timestamp, Rate) ->
+    statsderl_pool:sample(Rate, {timing_now_us, Key, Timestamp}).

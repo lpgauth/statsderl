@@ -1,25 +1,32 @@
 -module(statsderl_profile).
 
+-compile({parse_transform, statsderl_transform}).
+
 -export([
     fprofx/0
 ]).
 
--define(N, 1000).
--define(P, 100).
+-define(N, 10000).
+-define(P, 20).
 
 %% public
 -spec fprofx() -> ok.
 
 fprofx() ->
-    preload_modules(),
+    statsderl_app:start(),
+    [counter() || _ <- lists:seq(1, 100)],
+    statsderl_app:stop(),
+
     fprofx:start(),
     {ok, Tracer} = fprofx:profile(start),
     fprofx:trace([start, {procs, new}, {tracer, Tracer}]),
-    application:start(statsderl),
+
+    {ok, [statsderl]} = statsderl_app:start(),
+    timer:sleep(250),
 
     Self = self(),
     [spawn(fun () ->
-        timing_now(),
+        counter(),
         Self ! exit
     end) || _ <- lists:seq(1, ?P)],
     wait(),
@@ -32,15 +39,9 @@ fprofx() ->
     ok.
 
 %% private
-timing_now() ->
-    Timestamp = os:timestamp(),
-    [statsderl:timing_now(["test", <<".test">>], Timestamp, 0.25) ||
+counter() ->
+    [statsderl:counter(["test", <<".test">>], 5, 0.25) ||
         _ <- lists:seq(1, ?N)].
-
-preload_modules() ->
-    Filenames = filelib:wildcard("_build/default/lib/*/ebin/*.beam"),
-    Rootnames = [filename:rootname(Filename, ".beam") || Filename <- Filenames],
-    lists:foreach(fun code:load_abs/1, Rootnames).
 
 wait() ->
     wait(?P).
