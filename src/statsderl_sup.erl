@@ -13,13 +13,15 @@
 
 
 %% public
--spec start_link() -> {ok, pid()}.
+-spec start_link() ->
+    {ok, pid()}.
 
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 %% supervisor callbacks
--spec init([]) -> {ok, {{one_for_one, 5, 10}, [supervisor:child_spec()]}}.
+-spec init([]) ->
+    {ok, {{one_for_one, 5, 10}, [supervisor:child_spec()]}}.
 
 init(_Args) ->
     {ok, {{one_for_one, 5, 10}, child_specs(?POOL_SIZE)}}.
@@ -28,5 +30,5 @@ init(_Args) ->
 child_specs(0) ->
     [];
 child_specs(N) ->
-    Name = statsderl_utils:server_name(N),
+    Name = statsderl_pool:server_name(N),
     [?CHILD(Name, ?SERVER) | child_specs(N - 1)].

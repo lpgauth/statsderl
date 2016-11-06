@@ -1,19 +1,22 @@
 -module(statsderl_utils).
 -include("statsderl.hrl").
 
+-compile(inline).
+-compile({inline_size, 512}).
+
 -export([
     base_key/1,
     error_msg/2,
     getaddrs/1,
-    random/1,
     random_element/1,
-    random_server/0,
-    server_name/1,
-    timestamp/0
+    timestamp/0,
+    timing_now/1,
+    timing_now_us/1
 ]).
 
 %% public
--spec base_key(base_key()) -> iodata().
+-spec base_key(base_key()) ->
+    iodata().
 
 base_key(hostname) ->
     [hostname(), $.];
@@ -35,7 +38,8 @@ base_key([H | T] = Key) ->
             [base_key(H) | base_key(T)]
     end.
 
--spec error_msg(string(), [term()]) -> ok.
+-spec error_msg(string(), [term()]) ->
+    ok.
 
 error_msg(Format, Data) ->
     error_logger:error_msg("[statsderl] " ++ Format, Data).
@@ -56,36 +60,33 @@ getaddrs(Hostname) ->
             {error, Reason}
     end.
 
--spec random(pos_integer()) -> pos_integer().
-
-random(N) ->
-    granderl:uniform(N).
-
--spec random_element([term()]) -> term().
+-spec random_element([term()]) ->
+    term().
 
 random_element([Element]) ->
     Element;
 random_element([_|_] = List) ->
     T = list_to_tuple(List),
-    Index = random(tuple_size(T)),
+    Index = granderl:uniform(tuple_size(T)),
     element(Index, T).
 
--spec random_server() -> atom().
-
-random_server() ->
-    server_name(random(?POOL_SIZE)).
-
--spec server_name(pos_integer()) -> atom().
-
-server_name(1) -> statsderl_1;
-server_name(2) -> statsderl_2;
-server_name(3) -> statsderl_3;
-server_name(4) -> statsderl_4.
-
--spec timestamp() -> erlang:timestamp().
+-spec timestamp() ->
+    erlang:timestamp().
 
 timestamp() ->
     os:timestamp().
+
+-spec timing_now(erlang:timestamp()) ->
+    non_neg_integer().
+
+timing_now(Timestamp) ->
+    timing_now_us(Timestamp) div 1000.
+
+-spec timing_now_us(erlang:timestamp()) ->
+    non_neg_integer().
+
+timing_now_us(Timestamp) ->
+    timer:now_diff(statsderl_utils:timestamp(), Timestamp).
 
 %% private
 hostname() ->

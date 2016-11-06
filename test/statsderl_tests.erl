@@ -2,8 +2,7 @@
 -include_lib("statsderl/include/statsderl.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
--spec test() -> ok.
-
+%% tests
 statsderl_base_key_test() ->
     assert_base_key("base_key", <<"base_key.">>),
     assert_base_key(<<"base_key">>, <<"base_key.">>).
@@ -33,7 +32,9 @@ statsderl_test_() ->
             fun increment_subtest/1,
             fun sampling_rate_subtest/1,
             fun timing_fun_subtest/1,
-            fun timing_subtest/1
+            fun timing_subtest/1,
+            fun timing_now_subtest/1,
+            fun timing_now_us_subtest/1
         ]}
     }.
 
@@ -63,15 +64,15 @@ increment_subtest(Socket) ->
     assert_packet(Socket, <<"test:1|c">>).
 
 sampling_rate_subtest(Socket) ->
-    meck:new(statsderl_utils, [passthrough, no_history]),
-    meck:expect(statsderl_utils, random, fun (?MAX_UNSIGNED_INT_32) -> 1 end),
+    meck:new(granderl, [passthrough, no_history]),
+    meck:expect(granderl, uniform, fun (?MAX_UNSIGNED_INT_32) -> 1 end),
     statsderl:counter("test", 1, 0.1234),
     assert_packet(Socket, <<"test:1|c|@0.123">>),
-    meck:expect(statsderl_utils, random, fun (?MAX_UNSIGNED_INT_32) ->
+    meck:expect(granderl, uniform, fun (?MAX_UNSIGNED_INT_32) ->
         ?MAX_UNSIGNED_INT_32
     end),
     statsderl:counter("test", 1, 0.1234),
-    meck:unload(statsderl_utils).
+    meck:unload(granderl).
 
 timing_fun_subtest(Socket) ->
     meck:new(statsderl_utils, [passthrough, no_history]),
@@ -84,6 +85,22 @@ timing_fun_subtest(Socket) ->
 timing_subtest(Socket) ->
     statsderl:timing("test", 1, 1),
     assert_packet(Socket, <<"test:1|ms">>).
+
+timing_now_subtest(Socket) ->
+    meck:new(statsderl_utils, [passthrough, no_history]),
+    Seq = meck:loop([{1448, 573976, 400000}, {1448, 573976, 500000}]),
+    meck:expect(statsderl_utils, timestamp, [], Seq),
+    statsderl:timing_now("test", statsderl_utils:timestamp(), 1),
+    assert_packet(Socket, <<"test:100|ms">>),
+    meck:unload(statsderl_utils).
+
+timing_now_us_subtest(Socket) ->
+    meck:new(statsderl_utils, [passthrough, no_history]),
+    Seq = meck:loop([{1448, 573977, 400000}, {1448, 573977, 500000}]),
+    meck:expect(statsderl_utils, timestamp, [], Seq),
+    statsderl:timing_now_us("test", statsderl_utils:timestamp(), 1),
+    assert_packet(Socket, <<"test:100000|ms">>),
+    meck:unload(statsderl_utils).
 
 %% helpers
 assert_base_key(BaseKey, Expected) ->

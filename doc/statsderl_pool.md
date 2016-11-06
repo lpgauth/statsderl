@@ -1,6 +1,6 @@
 
 
-# Module statsderl_protocol #
+# Module statsderl_pool #
 * [Data Types](#types)
 * [Function Index](#index)
 * [Function Details](#functions)
@@ -54,19 +54,37 @@ value() = number()
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#encode-1">encode/1</a></td><td></td></tr></table>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#sample-2">sample/2</a></td><td></td></tr><tr><td valign="top"><a href="#sample_scaled-2">sample_scaled/2</a></td><td></td></tr><tr><td valign="top"><a href="#server_name-1">server_name/1</a></td><td></td></tr></table>
 
 
 <a name="functions"></a>
 
 ## Function Details ##
 
-<a name="encode-1"></a>
+<a name="sample-2"></a>
 
-### encode/1 ###
+### sample/2 ###
 
 <pre><code>
-encode(X1::<a href="#type-operation">operation()</a>) -&gt; iodata()
+sample(Rate::<a href="#type-sample_rate">sample_rate()</a>, Operation::<a href="#type-operation">operation()</a>) -&gt; ok
+</code></pre>
+<br />
+
+<a name="sample_scaled-2"></a>
+
+### sample_scaled/2 ###
+
+<pre><code>
+sample_scaled(RateInt::non_neg_integer(), Operation::<a href="#type-operation">operation()</a>) -&gt; ok
+</code></pre>
+<br />
+
+<a name="server_name-1"></a>
+
+### server_name/1 ###
+
+<pre><code>
+server_name(X1::1..4) -&gt; atom()
 </code></pre>
 <br />
 

@@ -12,6 +12,7 @@ High Performance Erlang StatsD Client
 ### Features
 
 * Performance optimized
+* Parse transform
 
 ## API
 <a href="https://github.com/lpgauth/statsderl/blob/master/doc/statsderl.md#index" class="module">Function Index</a>
@@ -74,6 +75,13 @@ High Performance Erlang StatsD Client
   </tr>
 </table>
 
+## Parse Transform
+
+`statsderl_transform` is used to pre-compute (at compile time) the scaled sample rate and `StatsD` packet.
+
+```erlang
+-compile({parse_transform, statsderl_transform}).
+```
 ## Examples
 
 ```erlang
@@ -119,10 +127,6 @@ ok.
 ```makefile
 make test
 ```
-
-### TODOs
-
-* parse transform for type conversion
 
 ## License
 
