@@ -27,7 +27,7 @@ encode({timing, Key, Value}) ->
 format_sample_rate(SampleRate) when SampleRate >= 1 ->
     <<>>;
 format_sample_rate(SampleRate) ->
-    [<<"|@">>, float_to_list(SampleRate, [{decimals, 3}])].
+    [<<"|@">>, float_to_list(SampleRate, [compact, {decimals, 6}])].
 
 format_value(Value) when is_integer(Value) ->
     integer_to_list(Value);
