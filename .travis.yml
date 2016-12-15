@@ -8,8 +8,10 @@ cache:
   directories:
     - $HOME/.cache/rebar3
     - $TRAVIS_BUILD_DIR/_build
+dist: trusty
 env:
   - CC=gcc-5
+group: edge
 install: true
 language: erlang
 notifications:
@@ -18,4 +20,3 @@ otp_release:
   - 19.1
   - 18.3
 script: "make travis"
-sudo: false
