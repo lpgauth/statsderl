@@ -66,7 +66,8 @@ random_server() ->
 
 send(ServerName, Msg) ->
     try
-        ServerName ! Msg
+        ServerName ! Msg,
+        ok
     catch
         _:_ ->
             ok
