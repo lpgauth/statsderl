@@ -1,12 +1,11 @@
 {application, statsderl, [
-  {description, "statsd client"},
-  {vsn, "0.5.1"},
-  {registered, []},
-  {applications, [
-    kernel,
-    stdlib,
-    granderl
-  ]},
+  {applications, [kernel, stdlib, granderl]},
+  {description, "High Performance Erlang StatsD Client"},
+  {env, []},
+  {licenses, ["MIT"]},
+  {links, [{"GitHub", "https://github.com/lpgauth/statsderl"}]},
+  {maintainers, ["Louis-Philippe Gauthier"]},
   {mod, {statsderl_app, []}},
-  {env, []}
+  {registered, []},
+  {vsn, "0.5.1"}
 ]}.

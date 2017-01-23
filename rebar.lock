@@ -1,8 +1,8 @@
-[{<<"granderl">>,
-  {git,"https://github.com/tokenrove/granderl.git",
-       {ref,"b44725cdd3ae6d2d4170e0d72ebb2fcad98d5ad2"}},
-  0},
- {<<"parse_trans">>,
-  {git,"https://github.com/uwiger/parse_trans.git",
-       {ref,"6f3645afb43c7c57d61b54ef59aecab288ce1013"}},
-  0}].
+{"1.1.0",
+[{<<"granderl">>,{pkg,<<"granderl">>,<<"0.1.5">>},0},
+ {<<"parse_trans">>,{pkg,<<"parse_trans">>,<<"3.0.0">>},0}]}.
+[
+{pkg_hash,[
+ {<<"granderl">>, <<"F20077A68BD80B8D8783BD15A052813C6483771DEC1A5B837D307CBE92F14122">>},
+ {<<"parse_trans">>, <<"9E96B1C9C3A0DF54E7B76F8F685D38BFA1EB21B31E042B1D1A5A70258E4DB1E3">>}]}
+].
