@@ -32,6 +32,16 @@ operation() = {cast, iodata()} | {counter, <a href="#type-key">key()</a>, <a hre
 
 
 
+### <a name="type-pool_size">pool_size()</a> ###
+
+
+<pre><code>
+pool_size() = pos_integer()
+</code></pre>
+
+
+
+
 ### <a name="type-sample_rate">sample_rate()</a> ###
 
 
@@ -54,12 +64,21 @@ value() = number()
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#sample-2">sample/2</a></td><td></td></tr><tr><td valign="top"><a href="#sample_scaled-2">sample_scaled/2</a></td><td></td></tr><tr><td valign="top"><a href="#server_name-1">server_name/1</a></td><td></td></tr></table>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#init-0">init/0</a></td><td></td></tr><tr><td valign="top"><a href="#sample-2">sample/2</a></td><td></td></tr><tr><td valign="top"><a href="#sample_scaled-2">sample_scaled/2</a></td><td></td></tr><tr><td valign="top"><a href="#server_name-1">server_name/1</a></td><td></td></tr><tr><td valign="top"><a href="#size-0">size/0</a></td><td></td></tr></table>
 
 
 <a name="functions"></a>
 
 ## Function Details ##
+
+<a name="init-0"></a>
+
+### init/0 ###
+
+<pre><code>
+init() -&gt; ok
+</code></pre>
+<br />
 
 <a name="sample-2"></a>
 
@@ -84,7 +103,16 @@ sample_scaled(RateInt::non_neg_integer(), Operation::<a href="#type-operation">o
 ### server_name/1 ###
 
 <pre><code>
-server_name(X1::1..4) -&gt; atom()
+server_name(N::pos_integer()) -&gt; atom()
+</code></pre>
+<br />
+
+<a name="size-0"></a>
+
+### size/0 ###
+
+<pre><code>
+size() -&gt; <a href="#type-pool_size">pool_size()</a>
 </code></pre>
 <br />
 

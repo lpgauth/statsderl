@@ -44,6 +44,12 @@ High Performance Erlang StatsD Client
     <td>8125</td>
     <td>server port</td>
   </tr>
+  <tr>
+    <td>pool_size</td>
+    <td>pos_integer()</td>
+    <td>4</td>
+    <td>pool size</td>
+  </tr>
 </table>
 
 #### base_key options
