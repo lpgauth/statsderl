@@ -4,13 +4,30 @@
 -compile(inline).
 -compile({inline_size, 512}).
 
+-ignore_xref([
+    {statsderl_pool_foil, lookup, 1}
+]).
+
 -export([
+    init/0,
     sample/2,
     sample_scaled/2,
-    server_name/1
+    server_name/1,
+    size/0
 ]).
 
 %% public
+-spec init() ->
+    ok.
+
+init() ->
+    foil:new(statsderl_pool),
+    PoolSize = ?ENV(pool_size, ?DEFAULT_POOL_SIZE),
+    foil:insert(statsderl_pool, pool_size, PoolSize),
+    [foil:insert(statsderl_pool, N, server_name_gen(N)) ||
+        N <- lists:seq(1, PoolSize)],
+    foil:load(statsderl_pool).
+
 -spec sample(sample_rate(), operation()) ->
     ok.
 
@@ -29,19 +46,33 @@ sample_scaled(RateInt, Operation) ->
     Rand = granderl:uniform(?MAX_UNSIGNED_INT_32),
     case Rand =< RateInt of
         true  ->
-            N = Rand rem ?POOL_SIZE + 1,
+            N = Rand rem size() + 1,
             operation(Operation, server_name(N));
         false ->
             ok
     end.
 
--spec server_name(1..4) ->
+-spec server_name(pos_integer()) ->
     atom().
 
-server_name(1) -> statsderl_1;
-server_name(2) -> statsderl_2;
-server_name(3) -> statsderl_3;
-server_name(4) -> statsderl_4.
+server_name(N) ->
+    case statsderl_pool_foil:lookup(N) of
+        {ok, Value} ->
+            Value;
+        {error, _Reason} ->
+            undefined
+    end.
+
+-spec size() ->
+    pool_size().
+
+size() ->
+    case statsderl_pool_foil:lookup(pool_size) of
+        {ok, Value} ->
+            Value;
+        {error, _Reason} ->
+            undefined
+    end.
 
 %% private
 cast({cast, _} = Cast, ServerName) ->
@@ -62,7 +93,7 @@ operation(Operation, ServerName) ->
     cast(Operation, ServerName).
 
 random_server() ->
-    server_name(granderl:uniform(?POOL_SIZE)).
+    server_name(granderl:uniform(size())).
 
 send(ServerName, Msg) ->
     try
@@ -72,3 +103,6 @@ send(ServerName, Msg) ->
         _:_ ->
             ok
     end.
+
+server_name_gen(N) ->
+    list_to_atom("statsderl_" ++ integer_to_list(N)).

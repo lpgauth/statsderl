@@ -24,7 +24,9 @@ start_link() ->
     {ok, {{one_for_one, 5, 10}, [supervisor:child_spec()]}}.
 
 init(_Args) ->
-    {ok, {{one_for_one, 5, 10}, child_specs(?POOL_SIZE)}}.
+    ok = statsderl_pool:init(),
+    PoolSize = statsderl_pool:size(),
+    {ok, {{one_for_one, 5, 10}, child_specs(PoolSize)}}.
 
 %% private
 child_specs(0) ->
