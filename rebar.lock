@@ -1,7 +1,7 @@
 {"1.1.0",
 [{<<"foil">>,{pkg,<<"foil">>,<<"0.1.0">>},0},
  {<<"granderl">>,{pkg,<<"granderl">>,<<"0.1.5">>},0},
- {<<"metal">>,{pkg,<<"metal">>,<<"0.1.1">>},1},
+ {<<"metal">>,{pkg,<<"metal">>,<<"0.1.1">>},0},
  {<<"parse_trans">>,{pkg,<<"parse_trans">>,<<"3.0.0">>},0}]}.
 [
 {pkg_hash,[

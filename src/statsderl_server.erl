@@ -5,8 +5,14 @@
 -compile({inline_size, 512}).
 
 -export([
-    init/2,
     start_link/1
+]).
+
+-behaviour(metal).
+-export([
+    init/3,
+    handle_msg/2,
+    terminate/2
 ]).
 
 -record(state, {
@@ -15,10 +21,17 @@
 }).
 
 %% public
--spec init(pid(), atom()) ->
-    no_return().
+-spec start_link(atom()) ->
+    {ok, pid()}.
 
-init(Parent, Name) ->
+start_link(Name) ->
+    metal:start_link(?SERVER, Name, undefined).
+
+%% metal callbacks
+-spec init(atom(), pid(), term()) ->
+    {ok, term()} | {stop, atom()}.
+
+init(_Name, _Parent, _Opts) ->
     BaseKey = ?ENV(?ENV_BASEKEY, ?DEFAULT_BASEKEY),
     Hostname = ?ENV(?ENV_HOSTNAME, ?DEFAULT_HOSTNAME),
     Port = ?ENV(?ENV_PORT, ?DEFAULT_PORT),
@@ -27,43 +40,40 @@ init(Parent, Name) ->
         {ok, Header} ->
             case gen_udp:open(0, [{active, false}]) of
                 {ok, Socket} ->
-                    register(Name, self()),
-                    proc_lib:init_ack(Parent, {ok, self()}),
-
-                    loop(#state {
+                    {ok, #state {
                         socket = Socket,
                         header = Header
-                    });
+                    }};
                 {error, Reason} ->
-                    exit(Reason)
+                    {stop, Reason}
             end;
         {error, Reason} ->
-            exit(Reason)
+            {stop, Reason}
     end.
 
--spec start_link(atom()) ->
-    {ok, pid()}.
+-spec handle_msg(term(), term()) ->
+    {ok, term()}.
 
-start_link(Name) ->
-    proc_lib:start_link(?MODULE, init, [self(), Name]).
-
-%% private
-loop(#state {
+handle_msg({cast, Packet}, #state {
         header = Header,
         socket = Socket
     } = State) ->
 
-    receive
-        {cast, Packet} ->
-            erlang:port_command(Socket, [Header, Packet]),
-            loop(State);
-        {inet_reply, _Socket, ok} ->
-            loop(State);
-        {inet_reply, _Socket, {error, Reason}} ->
-            statsderl_utils:error_msg("inet_reply error: ~p~n", [Reason]),
-            loop(State)
-    end.
+    erlang:port_command(Socket, [Header, Packet]),
+    {ok, State};
+handle_msg({inet_reply, _Socket, ok}, State) ->
+    {ok, State};
+handle_msg({inet_reply, _Socket, {error, Reason}}, State) ->
+    statsderl_utils:error_msg("inet_reply error: ~p~n", [Reason]),
+    {ok, State}.
 
+-spec terminate(term(), term()) ->
+    ok.
+
+terminate(_Reason, _State) ->
+    ok.
+
+%% private
 udp_header(Hostname, Port, BaseKey) ->
     case statsderl_utils:getaddrs(Hostname) of
         {ok, {A, B, C, D}} ->
