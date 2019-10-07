@@ -20,6 +20,16 @@
     socket :: inet:socket()
 }).
 
+-ifdef(OTP_RELEASE).
+    -if(?OTP_RELEASE >= 22).
+        -define(HEADER(Header, BaseKey), [Header, [0,0,0,0], [], BaseKey]).
+    -else.
+        -define(HEADER(Header, BaseKey), [Header, BaseKey]).
+    -endif.
+-else.
+    -define(HEADER(Header, BaseKey), [Header, BaseKey]).
+-endif.
+
 %% public
 -spec start_link(atom()) ->
     {ok, pid()}.
@@ -58,7 +68,6 @@ handle_msg({cast, Packet}, #state {
         header = Header,
         socket = Socket
     } = State) ->
-
     erlang:port_command(Socket, [Header, Packet]),
     {ok, State};
 handle_msg({inet_reply, _Socket, ok}, State) ->
@@ -79,7 +88,7 @@ udp_header(Hostname, Port, BaseKey) ->
         {ok, {A, B, C, D}} ->
             Header = statsderl_udp:header({A, B, C, D}, Port),
             BaseKey2 = statsderl_utils:base_key(BaseKey),
-            {ok, [Header, BaseKey2]};
+            {ok, ?HEADER(Header, BaseKey2)};
         {error, Reason} ->
             {error, Reason}
     end.
