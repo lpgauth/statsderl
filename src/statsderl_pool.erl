@@ -56,10 +56,13 @@ sample_scaled(RateInt, Operation) ->
     atom().
 
 server_name(N) ->
-    case statsderl_pool_foil:lookup(N) of
+    try statsderl_pool_foil:lookup(N) of
         {ok, Value} ->
             Value;
         {error, _Reason} ->
+            undefined
+    catch
+        error:undef ->
             undefined
     end.
 
@@ -67,11 +70,14 @@ server_name(N) ->
     pool_size().
 
 size() ->
-    case statsderl_pool_foil:lookup(pool_size) of
+    try foil:lookup(?MODULE, pool_size) of
         {ok, Value} ->
             Value;
         {error, _Reason} ->
-            undefined
+            1
+    catch
+        error:undef ->
+            1
     end.
 
 %% private
