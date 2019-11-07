@@ -62,7 +62,7 @@ timing(Key, Value, Rate) ->
     statsderl_pool:sample(Rate, {timing, Key, Value}).
 
 -spec timing_fun(key(), fun(), sample_rate()) ->
-    ok.
+    any().
 
 timing_fun(Key, Fun, Rate) ->
     Timestamp = statsderl_utils:timestamp(),
