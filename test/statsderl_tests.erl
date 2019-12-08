@@ -78,8 +78,10 @@ timing_fun_subtest(Socket) ->
     meck:new(statsderl_utils, [passthrough, no_history]),
     Seq = meck:loop([{1448, 573975, 400000}, {1448, 573975, 500000}]),
     meck:expect(statsderl_utils, timestamp, [], Seq),
-    statsderl:timing_fun("test", fun () -> ok end, 1),
+    TestResult = "testresult",
+    Result = statsderl:timing_fun("test", fun () -> TestResult end, 1),
     assert_packet(Socket, <<"test:100|ms">>),
+    ?assertEqual(Result, TestResult),
     meck:unload(statsderl_utils).
 
 timing_subtest(Socket) ->
