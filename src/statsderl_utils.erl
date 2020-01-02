@@ -7,8 +7,6 @@
 -export([
     base_key/1,
     error_msg/2,
-    getaddrs/1,
-    random_element/1,
     timestamp/0,
     timing_now/1,
     timing_now_us/1
@@ -43,32 +41,6 @@ base_key([H | T] = Key) ->
 
 error_msg(Format, Data) ->
     error_logger:error_msg("[statsderl] " ++ Format, Data).
-
--spec getaddrs(inet:ip_address() | inet:hostname()) ->
-    {ok, inet:ip_address()} | {error, atom()}.
-
-getaddrs({_, _, _, _} = Address) ->
-    {ok, Address};
-getaddrs(Hostname) when is_binary(Hostname) ->
-    getaddrs(binary_to_list(Hostname));
-getaddrs(Hostname) ->
-    case inet:getaddrs(Hostname, inet) of
-        {ok, Addrs} ->
-            {ok, random_element(Addrs)};
-        {error, Reason} ->
-            error_msg("getaddrs error: ~p~n", [Reason]),
-            {error, Reason}
-    end.
-
--spec random_element([term()]) ->
-    term().
-
-random_element([Element]) ->
-    Element;
-random_element([_|_] = List) ->
-    T = list_to_tuple(List),
-    Index = granderl:uniform(tuple_size(T)),
-    element(Index, T).
 
 -spec timestamp() ->
     erlang:timestamp().
