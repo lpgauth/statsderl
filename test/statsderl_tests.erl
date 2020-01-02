@@ -7,18 +7,6 @@ statsderl_base_key_test() ->
     assert_base_key("base_key", <<"base_key.">>),
     assert_base_key(<<"base_key">>, <<"base_key.">>).
 
-statsderl_hostname_test() ->
-    meck:new(statsderl_utils, [passthrough, no_history]),
-    meck:expect(statsderl_utils, getaddrs, fun (_) ->
-        {ok, {127, 0, 0, 1}}
-    end),
-    Socket = setup([{?ENV_HOSTNAME, <<"adgear.com">>}]),
-    statsderl:counter("test", 1, 1),
-    {ok, {_Address, _Port, Packet}} = gen_udp:recv(Socket, 0),
-    ?assertEqual(<<"test:1|c">>, Packet),
-    meck:unload(statsderl_utils),
-    cleanup(Socket).
-
 statsderl_test_() ->
     {setup,
         fun () -> setup() end,

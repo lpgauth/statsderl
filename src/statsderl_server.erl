@@ -16,8 +16,8 @@
 ]).
 
 -record(state, {
-    header :: iodata(),
-    socket :: inet:socket()
+    base_key :: iodata(),
+    socket   :: inet:socket()
 }).
 
 %% public
@@ -32,21 +32,17 @@ start_link(Name) ->
     {ok, term()} | {stop, atom()}.
 
 init(_Name, _Parent, _Opts) ->
-    BaseKey = ?ENV(?ENV_BASEKEY, ?DEFAULT_BASEKEY),
-    Hostname = ?ENV(?ENV_HOSTNAME, ?DEFAULT_HOSTNAME),
-    Port = ?ENV(?ENV_PORT, ?DEFAULT_PORT),
+    case gen_udp:open(0, [{active, false}]) of
+        {ok, Socket} ->
+            BaseKey = ?ENV(?ENV_BASEKEY, ?DEFAULT_BASEKEY),
+            Hostname = ?ENV(?ENV_HOSTNAME, ?DEFAULT_HOSTNAME),
+            Port = ?ENV(?ENV_PORT, ?DEFAULT_PORT),
+            gen_udp:connect(Socket, Hostname, Port),
 
-    case udp_header(Hostname, Port, BaseKey) of
-        {ok, Header} ->
-            case gen_udp:open(0, [{active, false}]) of
-                {ok, Socket} ->
-                    {ok, #state {
-                        socket = Socket,
-                        header = Header
-                    }};
-                {error, Reason} ->
-                    {stop, Reason}
-            end;
+            {ok, #state {
+                base_key = statsderl_utils:base_key(BaseKey),
+                socket = Socket
+            }};
         {error, Reason} ->
             {stop, Reason}
     end.
@@ -55,31 +51,19 @@ init(_Name, _Parent, _Opts) ->
     {ok, term()}.
 
 handle_msg({cast, Packet}, #state {
-        header = Header,
+        base_key = BaseKey,
         socket = Socket
     } = State) ->
 
-    erlang:port_command(Socket, [Header, Packet]),
-    {ok, State};
-handle_msg({inet_reply, _Socket, ok}, State) ->
-    {ok, State};
-handle_msg({inet_reply, _Socket, {error, Reason}}, State) ->
-    statsderl_utils:error_msg("inet_reply error: ~p~n", [Reason]),
+    gen_udp:send(Socket, [BaseKey, Packet]),
     {ok, State}.
 
 -spec terminate(term(), term()) ->
     ok.
 
-terminate(_Reason, _State) ->
-    ok.
+terminate(_Reason, #state {
+        socket = Socket
+    }) ->
 
-%% private
-udp_header(Hostname, Port, BaseKey) ->
-    case statsderl_utils:getaddrs(Hostname) of
-        {ok, {A, B, C, D}} ->
-            Header = statsderl_udp:header({A, B, C, D}, Port),
-            BaseKey2 = statsderl_utils:base_key(BaseKey),
-            {ok, [Header, BaseKey2]};
-        {error, Reason} ->
-            {error, Reason}
-    end.
+    gen_udp:close(Socket),
+    ok.
