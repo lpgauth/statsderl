@@ -2,8 +2,7 @@
 
 High Performance Erlang StatsD Client
 
-[![Build Status](https://travis-ci.org/lpgauth/statsderl.svg?branch=master)](https://travis-ci.org/lpgauth/statsderl)
-[![Coverage Status](https://coveralls.io/repos/github/lpgauth/statsderl/badge.svg?branch=master)](https://coveralls.io/github/lpgauth/statsderl?branch=master)
+![Build Status](https://github.com/lpgauth/shackle/workflows/Erlang%20CI/badge.svg)
 
 ### Requirements
 
