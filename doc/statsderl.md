@@ -119,7 +119,7 @@ timing(Key::<a href="#type-key">key()</a>, Value::<a href="#type-value">value()<
 ### timing_fun/3 ###
 
 <pre><code>
-timing_fun(Key::<a href="#type-key">key()</a>, Fun::function(), Rate::<a href="#type-sample_rate">sample_rate()</a>) -&gt; ok
+timing_fun(Key::<a href="#type-key">key()</a>, Fun::function(), Rate::<a href="#type-sample_rate">sample_rate()</a>) -&gt; any()
 </code></pre>
 <br />
 

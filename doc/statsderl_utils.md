@@ -34,7 +34,7 @@ base_key_part() = hostname | name | sname | undefined | iodata()
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#base_key-1">base_key/1</a></td><td></td></tr><tr><td valign="top"><a href="#error_msg-2">error_msg/2</a></td><td></td></tr><tr><td valign="top"><a href="#getaddrs-1">getaddrs/1</a></td><td></td></tr><tr><td valign="top"><a href="#random_element-1">random_element/1</a></td><td></td></tr><tr><td valign="top"><a href="#timestamp-0">timestamp/0</a></td><td></td></tr><tr><td valign="top"><a href="#timing_now-1">timing_now/1</a></td><td></td></tr><tr><td valign="top"><a href="#timing_now_us-1">timing_now_us/1</a></td><td></td></tr></table>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#base_key-1">base_key/1</a></td><td></td></tr><tr><td valign="top"><a href="#error_msg-2">error_msg/2</a></td><td></td></tr><tr><td valign="top"><a href="#timestamp-0">timestamp/0</a></td><td></td></tr><tr><td valign="top"><a href="#timing_now-1">timing_now/1</a></td><td></td></tr><tr><td valign="top"><a href="#timing_now_us-1">timing_now_us/1</a></td><td></td></tr></table>
 
 
 <a name="functions"></a>
@@ -56,24 +56,6 @@ base_key(Key::<a href="#type-base_key">base_key()</a>) -&gt; iodata()
 
 <pre><code>
 error_msg(Format::string(), Data::[term()]) -&gt; ok
-</code></pre>
-<br />
-
-<a name="getaddrs-1"></a>
-
-### getaddrs/1 ###
-
-<pre><code>
-getaddrs(Address::<a href="inet.md#type-ip_address">inet:ip_address()</a> | <a href="inet.md#type-hostname">inet:hostname()</a>) -&gt; {ok, <a href="inet.md#type-ip_address">inet:ip_address()</a>} | {error, atom()}
-</code></pre>
-<br />
-
-<a name="random_element-1"></a>
-
-### random_element/1 ###
-
-<pre><code>
-random_element(List::[term()]) -&gt; term()
 </code></pre>
 <br />
 

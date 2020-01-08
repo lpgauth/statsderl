@@ -1,5 +1,4 @@
 %% encoding: UTF-8
 {application,statsderl}.
 {modules,[statsderl,statsderl_app,statsderl_pool,statsderl_protocol,
-          statsderl_server,statsderl_sup,statsderl_transform,statsderl_udp,
-          statsderl_utils]}.
+          statsderl_server,statsderl_sup,statsderl_transform,statsderl_utils]}.
