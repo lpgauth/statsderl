@@ -21,16 +21,19 @@ start_link() ->
 
 %% supervisor callbacks
 -spec init([]) ->
-    {ok, {{one_for_one, 5, 10}, [supervisor:child_spec()]}}.
+    {ok, {{one_for_one, 5, 10}, []}}.
 
 init(_Args) ->
-    ok = statsderl_pool:init(),
-    PoolSize = statsderl_pool:size(),
-    {ok, {{one_for_one, 5, 10}, child_specs(PoolSize)}}.
+    Hostname = ?ENV(?ENV_HOSTNAME, ?DEFAULT_HOSTNAME),
+    PoolSize = ?ENV(pool_size, ?DEFAULT_POOL_SIZE),
+    Port = ?ENV(?ENV_PORT, ?DEFAULT_PORT),
 
-%% private
-child_specs(0) ->
-    [];
-child_specs(N) ->
-    Name = statsderl_pool:server_name(N),
-    [?CHILD(Name, ?SERVER) | child_specs(N - 1)].
+    ClientOpts = [
+        {address, Hostname},
+        {port, Port},
+        {protocol, shackle_udp}
+    ],
+    PoolOtps = [{pool_size, PoolSize}],
+    ok = shackle_pool:start(?APP, ?CLIENT, ClientOpts, PoolOtps),
+
+    {ok, {{one_for_one, 5, 10}, []}}.
