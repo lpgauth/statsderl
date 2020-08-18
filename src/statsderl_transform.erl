@@ -30,7 +30,7 @@ do_transform(_Form) ->
 %% private
 call(Function, Arg1, Arg2) ->
     {call, 0, {remote, 0,
-        {atom, 0, statsderl_pool},
+        {atom, 0, statsderl_sample},
         {atom, 0, Function}}, [Arg1, Arg2]
     }.
 
@@ -110,10 +110,10 @@ replace(Function, {_, _, _, [Key, Value, Rate]} = F) ->
     end.
 
 sample(Rate, Arguments) ->
-    call(sample, Rate, Arguments).
+    call(rate, Rate, Arguments).
 
 sample_scaled(RateScaled, Arguments) ->
-    call(sample_scaled, ?INTEGER(RateScaled), Arguments).
+    call(rate_scaled, ?INTEGER(RateScaled), Arguments).
 
 safe_normalize(AbsTerm) ->
     try erl_parse:normalise(AbsTerm)

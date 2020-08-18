@@ -73,6 +73,8 @@ cleanup(Socket) ->
 setup() ->
     error_logger:tty(false),
     application:load(?APP),
-    statsderl_app:start(),
     {ok, Socket} = gen_udp:open(?DEFAULT_PORT, [binary, {active, false}]),
+    timer:sleep(100),
+    statsderl_app:start(),
+    timer:sleep(1000),
     Socket.

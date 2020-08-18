@@ -53,11 +53,15 @@ increment_subtest(Socket) ->
 
 sampling_rate_subtest(Socket) ->
     meck:new(granderl, [passthrough, no_history]),
-    meck:expect(granderl, uniform, fun (?MAX_UNSIGNED_INT_32) -> 1 end),
+    meck:expect(granderl, uniform, fun
+        (4) -> 2;
+        (?MAX_UNSIGNED_INT_32) -> 1
+    end),
     statsderl:counter("test", 1, 0.1234),
     assert_packet(Socket, <<"test:1|c|@0.1234">>),
-    meck:expect(granderl, uniform, fun (?MAX_UNSIGNED_INT_32) ->
-        ?MAX_UNSIGNED_INT_32
+    meck:expect(granderl, uniform, fun
+        (4) -> 2;
+        (?MAX_UNSIGNED_INT_32) -> ?MAX_UNSIGNED_INT_32
     end),
     statsderl:counter("test", 1, 0.1234),
     meck:unload(granderl).
@@ -116,6 +120,8 @@ setup(EnvVars) ->
     application:load(?APP),
     [application:unset_env(?APP, K) || K <- ?ENV_VARS],
     [application:set_env(?APP, K, V) || {K, V} <- EnvVars],
-    statsderl_app:start(),
     {ok, Socket} = gen_udp:open(?DEFAULT_PORT, [binary, {active, false}]),
+    timer:sleep(100),
+    statsderl_app:start(),
+    timer:sleep(1000),
     Socket.

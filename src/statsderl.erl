@@ -23,43 +23,43 @@
     ok.
 
 counter(Key, Value, Rate) ->
-    statsderl_pool:sample(Rate, {counter, Key, Value, Rate}).
+    statsderl_sample:rate(Rate, {counter, Key, Value, Rate}).
 
 -spec decrement(key(), value(), sample_rate()) ->
     ok.
 
 decrement(Key, Value, Rate) when Value >= 0 ->
-    statsderl_pool:sample(Rate, {counter, Key, -Value, Rate}).
+    statsderl_sample:rate(Rate, {counter, Key, -Value, Rate}).
 
 -spec gauge(key(), value(), sample_rate()) ->
     ok.
 
 gauge(Key, Value, Rate) when Value >= 0 ->
-    statsderl_pool:sample(Rate, {gauge, Key, Value}).
+    statsderl_sample:rate(Rate, {gauge, Key, Value}).
 
 -spec gauge_decrement(key(), value(), sample_rate()) ->
     ok.
 
 gauge_decrement(Key, Value, Rate) when Value >= 0 ->
-    statsderl_pool:sample(Rate, {gauge_decrement, Key, Value}).
+    statsderl_sample:rate(Rate, {gauge_decrement, Key, Value}).
 
 -spec gauge_increment(key(), value(), sample_rate()) ->
     ok.
 
 gauge_increment(Key, Value, Rate) when Value >= 0 ->
-    statsderl_pool:sample(Rate, {gauge_increment, Key, Value}).
+    statsderl_sample:rate(Rate, {gauge_increment, Key, Value}).
 
 -spec increment(key(), value(), sample_rate()) ->
     ok.
 
 increment(Key, Value, Rate) when Value >= 0 ->
-    statsderl_pool:sample(Rate, {counter, Key, Value, Rate}).
+    statsderl_sample:rate(Rate, {counter, Key, Value, Rate}).
 
 -spec timing(key(), value(), sample_rate()) ->
     ok.
 
 timing(Key, Value, Rate) ->
-    statsderl_pool:sample(Rate, {timing, Key, Value}).
+    statsderl_sample:rate(Rate, {timing, Key, Value}).
 
 -spec timing_fun(key(), fun(), sample_rate()) ->
     any().
@@ -74,10 +74,10 @@ timing_fun(Key, Fun, Rate) ->
     ok.
 
 timing_now(Key, Timestamp, Rate) ->
-    statsderl_pool:sample(Rate, {timing_now, Key, Timestamp}).
+    statsderl_sample:rate(Rate, {timing_now, Key, Timestamp}).
 
 -spec timing_now_us(key(), erlang:timestamp(), sample_rate()) ->
     ok.
 
 timing_now_us(Key, Timestamp, Rate) ->
-    statsderl_pool:sample(Rate, {timing_now_us, Key, Timestamp}).
+    statsderl_sample:rate(Rate, {timing_now_us, Key, Timestamp}).
