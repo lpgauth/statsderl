@@ -24,6 +24,7 @@ start_link() ->
     {ok, {{one_for_one, 5, 10}, []}}.
 
 init(_Args) ->
+    BacklogSize = ?ENV(backlog_size, ?DEFAULT_BACKLOG_SIZE),
     Hostname = ?ENV(?ENV_HOSTNAME, ?DEFAULT_HOSTNAME),
     PoolSize = ?ENV(pool_size, ?DEFAULT_POOL_SIZE),
     Port = ?ENV(?ENV_PORT, ?DEFAULT_PORT),
@@ -33,7 +34,10 @@ init(_Args) ->
         {port, Port},
         {protocol, shackle_udp}
     ],
-    PoolOtps = [{pool_size, PoolSize}],
+    PoolOtps = [
+        {backlog_size, BacklogSize},
+        {pool_size, PoolSize}
+    ],
     ok = shackle_pool:start(?APP, ?CLIENT, ClientOpts, PoolOtps),
 
     {ok, {{one_for_one, 5, 10}, []}}.

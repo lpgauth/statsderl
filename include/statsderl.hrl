@@ -12,6 +12,7 @@
 -define(ENV_VARS, [?ENV_BASEKEY, ?ENV_HOSTNAME, ?ENV_PORT]).
 
 %% defaults
+-define(DEFAULT_BACKLOG_SIZE, 4096).
 -define(DEFAULT_BASEKEY, undefined).
 -define(DEFAULT_HOSTNAME, "127.0.0.1").
 -define(DEFAULT_POOL_SIZE, 4).
