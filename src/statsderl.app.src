@@ -7,5 +7,5 @@
   {maintainers, ["Louis-Philippe Gauthier"]},
   {mod, {statsderl_app, []}},
   {registered, []},
-  {vsn, "0.6.0"}
+  {vsn, "0.6.1"}
 ]}.
