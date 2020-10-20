@@ -15,6 +15,7 @@
 -define(DEFAULT_BACKLOG_SIZE, 4096).
 -define(DEFAULT_BASEKEY, undefined).
 -define(DEFAULT_HOSTNAME, "127.0.0.1").
+-define(DEFAULT_POOL_NAME, statsderl_default).
 -define(DEFAULT_POOL_SIZE, 4).
 -define(DEFAULT_PORT, 8125).
 
@@ -30,6 +31,7 @@
                      {timing, key(), value()} |
                      {timing_now, key(), erlang:timestamp()} |
                      {timing_now_us, key(), erlang:timestamp()}.
+-type pool_name() :: atom().
 -type pool_size() :: pos_integer().
 -type sample_rate() :: number().
 -type value() :: number().

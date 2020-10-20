@@ -28,10 +28,10 @@ do_transform(_Form) ->
     continue.
 
 %% private
-call(Function, Arg1, Arg2) ->
+call(Function, Rate, Operation, PoolName) ->
     {call, 0, {remote, 0,
         {atom, 0, statsderl_sample},
-        {atom, 0, Function}}, [Arg1, Arg2]
+        {atom, 0, Function}}, [Rate, Operation, PoolName]
     }.
 
 encode(Operation) ->
@@ -84,6 +84,11 @@ rate_scaled(_) ->
 replace(timing_fun, F) ->
     F;
 replace(Function, {_, _, _, [Key, Value, Rate]} = F) ->
+    replace_function(Function, Key, Value, Rate, ?ATOM(statsderl_default), F);
+replace(Function, {_, _, _, [Key, Value, Rate, PoolName]} = F) ->
+    replace_function(Function, Key, Value, Rate, PoolName, F).
+
+replace_function(Function, Key, Value, Rate, PoolName, F) ->
     RateScaled = rate_scaled(Rate),
     OpCode = op_code(Function),
     Value2 = value(Function, Value),
@@ -96,24 +101,24 @@ replace(Function, {_, _, _, [Key, Value, Rate]} = F) ->
             case OpCode of
                 counter ->
                     sample_scaled(RateScaled,
-                        ?TUPLE([?ATOM(OpCode), Key, Value2, Rate]));
+                        ?TUPLE([?ATOM(OpCode), Key, Value2, Rate]), PoolName);
                 _ ->
                     sample_scaled(RateScaled,
-                        ?TUPLE([?ATOM(OpCode), Key, Value2]))
+                        ?TUPLE([?ATOM(OpCode), Key, Value2]), PoolName)
             end;
         {undefined, _} ->
             sample(Rate,
-                ?TUPLE([?ATOM(cast), ?BINARY(Packet)]));
+                ?TUPLE([?ATOM(cast), ?BINARY(Packet)]), PoolName);
         _ ->
             sample_scaled(RateScaled,
-                ?TUPLE([?ATOM(cast), ?BINARY(Packet)]))
+                ?TUPLE([?ATOM(cast), ?BINARY(Packet)]), PoolName)
     end.
 
-sample(Rate, Arguments) ->
-    call(rate, Rate, Arguments).
+sample(Rate, Operation, PoolName) ->
+    call(rate, Rate, Operation, PoolName).
 
-sample_scaled(RateScaled, Arguments) ->
-    call(rate_scaled, ?INTEGER(RateScaled), Arguments).
+sample_scaled(RateScaled, Operation, PoolName) ->
+    call(rate_scaled, ?INTEGER(RateScaled), Operation, PoolName).
 
 safe_normalize(AbsTerm) ->
     try erl_parse:normalise(AbsTerm)

@@ -36,5 +36,5 @@ start(_StartType, _StartArgs) ->
     ok.
 
 stop(_State) ->
-    shackle_pool:stop(?APP),
+    shackle_pool:stop(statsderl_default),
     ok.
