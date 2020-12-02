@@ -12,16 +12,16 @@
 -spec encode(operation()) -> iodata().
 
 encode({counter, Key, Value, SampleRate}) ->
-    [Key, <<":">>, format_value(Value), <<"|c">>,
+    [key(Key), <<":">>, format_value(Value), <<"|c">>,
         format_sample_rate(SampleRate)];
 encode({gauge, Key, Value}) ->
-    [Key, <<":">>, format_value(Value), <<"|g">>];
+    [key(Key), <<":">>, format_value(Value), <<"|g">>];
 encode({gauge_decrement, Key, Value}) ->
-    [Key, <<":-">>, format_value(Value), <<"|g">>];
+    [key(Key), <<":-">>, format_value(Value), <<"|g">>];
 encode({gauge_increment, Key, Value}) ->
-    [Key, <<":+">>, format_value(Value), <<"|g">>];
+    [key(Key), <<":+">>, format_value(Value), <<"|g">>];
 encode({timing, Key, Value}) ->
-    [Key, <<":">>, format_value(Value), <<"|ms">>].
+    [key(Key), <<":">>, format_value(Value), <<"|ms">>].
 
 %% private
 format_sample_rate(SampleRate) when SampleRate >= 1 ->
@@ -33,3 +33,8 @@ format_value(Value) when is_integer(Value) ->
     integer_to_list(Value);
 format_value(Value) when is_float(Value) ->
     float_to_list(Value, [{decimals, 2}]).
+
+key(Fun) when is_function(Fun) ->
+    Fun();
+key(Key) ->
+    Key.

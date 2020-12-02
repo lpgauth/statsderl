@@ -29,7 +29,12 @@ statsderl_test_() ->
 %% subtests
 counter_subtest(Socket) ->
     statsderl:counter("test", 1.123, 1),
-    assert_packet(Socket, <<"test:1.12|c">>).
+    assert_packet(Socket, <<"test:1.12|c">>),
+    statsderl:counter(fun () -> "test" end, 1.123, 1),
+    assert_packet(Socket, <<"test:1.12|c">>),
+    statsderl:counter(fun () ->
+        ["test.", integer_to_binary(100)] end, 1.123, 1),
+    assert_packet(Socket, <<"test.100:1.12|c">>).
 
 decrement_subtest(Socket) ->
     statsderl:decrement("test", 1, 1.0),
@@ -116,7 +121,8 @@ setup() ->
     setup([]).
 
 setup(EnvVars) ->
-    error_logger:tty(false),
+    application:start(sasl),
+    % error_logger:tty(false),
     application:load(?APP),
     [application:unset_env(?APP, K) || K <- ?ENV_VARS],
     [application:set_env(?APP, K, V) || {K, V} <- EnvVars],

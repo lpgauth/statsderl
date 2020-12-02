@@ -32,7 +32,12 @@ counter_subtest(Socket) ->
     statsderl:counter("test", B, 1),
     assert_packet(Socket, <<"test:5|c">>),
     statsderl:counter("test", 1, C),
-    assert_packet(Socket, <<"test:1|c">>).
+    assert_packet(Socket, <<"test:1|c">>),
+    statsderl:counter(fun () -> "test" end, 1, C),
+    assert_packet(Socket, <<"test:1|c">>),
+    statsderl:counter(fun () -> ["test.", integer_to_binary(100)] end, 1, C),
+    assert_packet(Socket, <<"test.100:1|c">>).
+
 
 decrement_subtest(Socket) ->
     statsderl:decrement("test", 1, 1.0),
