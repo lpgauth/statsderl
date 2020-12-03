@@ -22,7 +22,7 @@
 %% types
 -type base_key() :: base_key_part() | [base_key_part()].
 -type base_key_part() :: hostname | name | sname | undefined | iodata().
--type key() :: iodata() | fun().
+-type key() :: iodata() | fun(() -> iodata()).
 -type operation() :: {cast, iodata()} |
                      {counter, key(), value(), sample_rate()} |
                      {gauge, key(), value()} |
