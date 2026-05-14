@@ -128,6 +128,20 @@ ok.
 ok.
 ```
 
+## Telemetry
+
+statsderl emits two `telemetry` events at the sample-rate gate. Attach
+handlers via `telemetry:attach/4` for observability:
+
+| Event | Measurements | Metadata |
+|---|---|---|
+| `[statsderl, sample, sent]`    | `count => 1` | `operation => Operation` |
+| `[statsderl, sample, dropped]` | `count => 1` | `operation => Operation, rate => RateInt` |
+
+`Operation` is the original tuple passed to the sample gate (e.g.,
+`{counter, Key, Value, SampleRate}`). `RateInt` is the integer-scaled
+rate (`Rate * 4294967295`) compared against the PRNG draw.
+
 ## Tests
 
 ```makefile

@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.7.2
+
+### Added
+
+- Telemetry events at the sample-rate gate. statsderl now emits two
+  events that observers can attach to without instrumenting shackle
+  internals:
+
+  | Event | Measurements | Metadata | Fires when |
+  |---|---|---|---|
+  | `[statsderl, sample, sent]`    | `count => 1` | `operation => Operation` | A metric crosses the rate gate (or rate was 1/1.0) and is dispatched to shackle for UDP send. |
+  | `[statsderl, sample, dropped]` | `count => 1` | `operation => Operation, rate => RateInt` | The rate gate suppresses a metric (`Rand > RateInt`). |
+
+  Matches the telemetry pattern shackle (0.7.0) and whitecap already
+  use. Event names are stable; the metadata map may grow over time.
+
+- `telemetry` (1.4.2) is now a direct dependency. It was already
+  pulled in transitively via shackle.
+
+### Changed
+
+- `statsderl_sample:rate_scaled/2` and the private `cast/1` helper
+  now emit the telemetry events above. No behavioural change to
+  return values or wire-format output; the events sit on the existing
+  call paths.
+
 ## 0.7.1
 
 ### Changed

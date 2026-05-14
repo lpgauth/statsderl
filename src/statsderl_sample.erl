@@ -30,11 +30,17 @@ rate_scaled(RateInt, Operation) ->
         true  ->
             operation(Operation);
         false ->
+            telemetry:execute([statsderl, sample, dropped],
+                              #{count => 1},
+                              #{operation => Operation, rate => RateInt}),
             ok
     end.
 
 %% private
 cast(Request) ->
+    telemetry:execute([statsderl, sample, sent],
+                      #{count => 1},
+                      #{operation => Request}),
     shackle:cast(?APP, Request, undefined),
     ok.
 

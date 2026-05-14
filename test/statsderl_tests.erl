@@ -19,6 +19,8 @@ statsderl_test_() ->
             fun gauge_subtest/1,
             fun increment_subtest/1,
             fun sampling_rate_subtest/1,
+            fun telemetry_sent_subtest/1,
+            fun telemetry_dropped_subtest/1,
             fun timing_fun_subtest/1,
             fun timing_subtest/1,
             fun timing_now_subtest/1,
@@ -65,6 +67,48 @@ sampling_rate_subtest(Socket) ->
     end),
     statsderl:counter("test", 1, 0.1234),
     meck:unload(knot).
+
+telemetry_sent_subtest(Socket) ->
+    %% At rate=1, the metric always sends; we should see exactly one
+    %% [statsderl, sample, sent] event with the operation as metadata.
+    Self = self(),
+    Ref = make_ref(),
+    ok = telemetry:attach({?MODULE, Ref, sent}, [statsderl, sample, sent],
+        fun(E, Meas, Meta, _) -> Self ! {Ref, E, Meas, Meta} end, []),
+    try
+        statsderl:counter("tsent", 1, 1),
+        receive
+            {Ref, [statsderl, sample, sent], #{count := 1}, #{operation := _}} -> ok
+        after 1000 ->
+            erlang:error({telemetry_event_not_fired, sent})
+        end,
+        assert_packet(Socket, <<"tsent:1|c">>)
+    after
+        telemetry:detach({?MODULE, Ref, sent})
+    end.
+
+telemetry_dropped_subtest(_Socket) ->
+    %% Force the rate-gate to fail (knot:uniform returns MAX, RateInt is
+    %% strictly less, so Rand =< RateInt is false). Assert the dropped
+    %% event fires with the operation tuple intact.
+    meck:new(knot, [passthrough, no_history]),
+    meck:expect(knot, uniform, fun(?MAX_UNSIGNED_INT_32) -> ?MAX_UNSIGNED_INT_32 end),
+    Self = self(),
+    Ref = make_ref(),
+    ok = telemetry:attach({?MODULE, Ref, dropped}, [statsderl, sample, dropped],
+        fun(E, Meas, Meta, _) -> Self ! {Ref, E, Meas, Meta} end, []),
+    try
+        statsderl:counter("tdrop", 1, 0.0001),
+        receive
+            {Ref, [statsderl, sample, dropped], #{count := 1}, #{operation := _, rate := R}}
+              when is_integer(R) -> ok
+        after 1000 ->
+            erlang:error({telemetry_event_not_fired, dropped})
+        end
+    after
+        telemetry:detach({?MODULE, Ref, dropped}),
+        meck:unload(knot)
+    end.
 
 timing_fun_subtest(Socket) ->
     meck:new(statsderl_utils, [passthrough, no_history]),
