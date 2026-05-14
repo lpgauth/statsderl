@@ -16,7 +16,7 @@
 -type forms() :: [erl_parse:abstract_form() | erl_parse:form_info()].
 
 %% public
--spec parse_transform(forms(), [compile:option()]) ->
+-spec parse_transform(forms(), [term()]) ->
     forms().
 
 parse_transform(Forms, _Options) ->

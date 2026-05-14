@@ -2,11 +2,11 @@
 
 High Performance Erlang StatsD Client
 
-![Build Status](https://github.com/lpgauth/shackle/workflows/Erlang%20CI/badge.svg)
+![Build Status](https://github.com/lpgauth/statsderl/workflows/Erlang%20CI/badge.svg)
 
 ### Requirements
 
-* Erlang 16.0 +
+* Erlang/OTP 25+
 
 ### Features
 
@@ -14,7 +14,8 @@ High Performance Erlang StatsD Client
 * Parse transform
 
 ## API
-<a href="https://github.com/lpgauth/statsderl/blob/master/doc/statsderl.md#index" class="module">Function Index</a>
+
+[Function reference on hexdocs](https://hexdocs.pm/statsderl/)
 
 #### Environment variables:
 
@@ -138,7 +139,7 @@ make test
 ```license
 The MIT License (MIT)
 
-Copyright (c) 2011-2020 Louis-Philippe Gauthier
+Copyright (c) 2011-2026 Louis-Philippe Gauthier
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

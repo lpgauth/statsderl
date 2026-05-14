@@ -52,19 +52,19 @@ increment_subtest(Socket) ->
     assert_packet(Socket, <<"test:1|c">>).
 
 sampling_rate_subtest(Socket) ->
-    meck:new(granderl, [passthrough, no_history]),
-    meck:expect(granderl, uniform, fun
+    meck:new(knot, [passthrough, no_history]),
+    meck:expect(knot, uniform, fun
         (4) -> 2;
         (?MAX_UNSIGNED_INT_32) -> 1
     end),
     statsderl:counter("test", 1, 0.1234),
     assert_packet(Socket, <<"test:1|c|@0.1234">>),
-    meck:expect(granderl, uniform, fun
+    meck:expect(knot, uniform, fun
         (4) -> 2;
         (?MAX_UNSIGNED_INT_32) -> ?MAX_UNSIGNED_INT_32
     end),
     statsderl:counter("test", 1, 0.1234),
-    meck:unload(granderl).
+    meck:unload(knot).
 
 timing_fun_subtest(Socket) ->
     meck:new(statsderl_utils, [passthrough, no_history]),

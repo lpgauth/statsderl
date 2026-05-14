@@ -1,5 +1,5 @@
 {application, statsderl, [
-  {applications, [kernel, stdlib, granderl, shackle]},
+  {applications, [kernel, stdlib, knot, shackle]},
   {description, "High Performance Erlang StatsD Client"},
   {env, []},
   {licenses, ["MIT"]},

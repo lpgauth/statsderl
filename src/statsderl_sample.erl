@@ -25,7 +25,7 @@ rate(Rate, Operation) ->
     ok.
 
 rate_scaled(RateInt, Operation) ->
-    Rand = granderl:uniform(?MAX_UNSIGNED_INT_32),
+    Rand = knot:uniform(?MAX_UNSIGNED_INT_32),
     case Rand =< RateInt of
         true  ->
             operation(Operation);

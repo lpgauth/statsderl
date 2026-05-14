@@ -15,12 +15,8 @@ compile:
 	@$(REBAR3) as compile compile
 
 dialyzer:
-	@echo "Running rebar3 dialyze..."
+	@echo "Running rebar3 dialyzer..."
 	@$(REBAR3) dialyzer
-
-edoc:
-	@echo "Running rebar3 edoc..."
-	@$(REBAR3) as edoc edoc
 
 eunit:
 	@echo "Running rebar3 eunit..."
@@ -43,4 +39,4 @@ xref:
 	@echo "Running rebar3 xref..."
 	@$(REBAR3) xref
 
-.PHONY: clean compile dialyzer edoc eunit profile xref
+.PHONY: clean compile dialyzer eunit profile test xref
