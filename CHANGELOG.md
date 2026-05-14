@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.7.1
+
+### Changed
+
+- Bumped `shackle` dependency from `0.7.0` to `0.7.1`, which itself
+  bumps `metal 0.1.1 -> 0.1.2` and `foil 0.1.3 -> 0.1.4` (both
+  infrastructure-only refreshes, plus a tightened `error/0` type
+  and a macro-based DRY refactor in foil).
+
+`0.7.0` was tagged in git but its hex publish failed (the granderl
+removal commit landed past hex's one-hour modification window for
+the pre-existing 0.7.0 release). `0.7.1` is the first hex release
+to ship the granderl-to-knot swap; behaviour and API are
+identical to the `0.7.0` git tag.
+
 ## 0.7.0
 
 ### Breaking
