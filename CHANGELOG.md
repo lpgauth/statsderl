@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.3
+
+### Changed
+
+- Upgrade knot to 0.1.2, meck to 1.2.0 and shackle to 0.7.3.
+- Remove fprofx profile tooling.
+
 ## 0.7.2
 
 ### Added
