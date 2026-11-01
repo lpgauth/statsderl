@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.4
+
+### Changed
+
+- Bump shackle to 0.10.0.
+
 ## 0.7.3
 
 ### Changed
